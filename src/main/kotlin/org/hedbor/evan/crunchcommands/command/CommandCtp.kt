@@ -5,11 +5,19 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.permissions.PermissionDefault
+import org.bukkit.plugin.java.annotation.permission.Permission
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.CMD_USAGE
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
+import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
 /**
  * Teleports the caller to the specified player.
  */
+@CommandYml(name = "ctp", desc = "Teleports to another player.", permission = "$PLUGIN_ID.ctp", permissionMessage = PERM_MSG, usage = "$CMD_USAGE <name>")
+@Permission(name = "$PLUGIN_ID.ctp", desc = "Allows ctp command", defaultValue = PermissionDefault.TRUE)
 object CommandCtp : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
