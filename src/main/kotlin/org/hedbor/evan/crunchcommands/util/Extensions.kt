@@ -31,11 +31,7 @@ fun JavaPlugin.commands(block: CommandsBlock.() -> Unit) {
 }
 
 class CommandsBlock {
-    fun JavaPlugin.command(name: String, block: PluginCommand.() -> Unit = {}) {
-        getCommand(name).block()
-    }
-
-    fun JavaPlugin.command(name: String, executor: CommandExecutor, block: PluginCommand.() -> Unit = {}) {
+    fun JavaPlugin.command(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
         val c = getCommand(name)
         c.executor = executor
         c.block()
@@ -49,6 +45,8 @@ fun itemStack(material: Material, block: ItemStack.() -> Unit = {}): ItemStack {
 }
 
 fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
-    itemMeta.block()
+    val itemMetaCopy = itemMeta
+    itemMetaCopy.block()
+    itemMeta = itemMetaCopy
     return itemMeta
 }
