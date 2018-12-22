@@ -17,6 +17,7 @@
 
 package org.hedbor.evan.crunchcommands
 
+import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.java.annotation.permission.ChildPermission
@@ -29,7 +30,11 @@ import org.bukkit.plugin.java.annotation.plugin.author.Author
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.command.CommandCtp
 import org.hedbor.evan.crunchcommands.command.CommandDirt
-import org.hedbor.evan.crunchcommands.util.commands
+import org.hedbor.evan.crunchcommands.command.CommandWarp
+import org.hedbor.evan.crunchcommands.util.getObjectList
+import org.hedbor.evan.crunchcommands.util.registerCommands
+import org.hedbor.evan.crunchcommands.warp.Warp
+import org.hedbor.evan.crunchcommands.warp.WarpManager
 
 
 /**
@@ -42,20 +47,50 @@ import org.hedbor.evan.crunchcommands.util.commands
 @Permissions(value = [
     Permission(name = "$PLUGIN_ID.*", desc = "Wildcard permission", defaultValue = PermissionDefault.OP, children = [
         ChildPermission(name = "$PLUGIN_ID.dirt"),
-        ChildPermission(name = "$PLUGIN_ID.ctp")
+        ChildPermission(name = "$PLUGIN_ID.ctp"),
+        ChildPermission(name = "$PLUGIN_ID.warp.*")
     ])
 ])
 class CrunchCommands : JavaPlugin() {
+    lateinit var warpManager: WarpManager
+
     companion object {
         internal const val PLUGIN_ID = "crunchcommands"
-        internal const val PERM_MSG = "You do not have permission to use this command."
-        internal const val CMD_USAGE = "Usage: /<command>"
+        internal const val PERM_MSG = "§cYou do not have permission to use this command."
+        internal const val CMD_USAGE = "§cUsage: /<command>"
+
+        @Suppress("ObjectPropertyName")
+        private var _instance: CrunchCommands? = null
+        val instance: CrunchCommands
+            get() = _instance ?: throw IllegalStateException("Plugin instance does not exist.")
     }
 
     override fun onEnable() {
-        commands {
-            command("dirt", CommandDirt)
-            command("ctp", CommandCtp)
-        }
+        _instance = this
+
+        registerCommands(
+            "dirt" to CommandDirt,
+            "ctp" to CommandCtp,
+            "warp" to CommandWarp
+        )
+
+        setupConfig()
+    }
+
+    override fun onDisable() {
+        saveConfig()
+    }
+
+    private fun setupConfig() {
+        ConfigurationSerialization.registerClass(Warp::class.java, "org.hedbor.evan.crunchcommands.warp.Warp")
+        config.addDefault("warps", emptyList<Warp>())
+
+        val warps = config.getObjectList<Warp>("warps")
+        warpManager = WarpManager(warps)
+    }
+
+    override fun saveConfig() {
+        config["warps"] = warpManager.warps
+        super.saveConfig()
     }
 }

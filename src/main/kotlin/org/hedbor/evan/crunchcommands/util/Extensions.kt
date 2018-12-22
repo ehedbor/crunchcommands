@@ -20,21 +20,22 @@ package org.hedbor.evan.crunchcommands.util
 import org.bukkit.Material
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.PluginCommand
+import org.bukkit.configuration.Configuration
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.reflect.KClass
 
 
-@Suppress("unused")
-fun JavaPlugin.commands(block: CommandsBlock.() -> Unit) {
-    CommandsBlock().block()
+fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
+    val c = getCommand(name)
+    c.executor = executor
+    c.block()
 }
 
-class CommandsBlock {
-    fun JavaPlugin.command(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
-        val c = getCommand(name)
-        c.executor = executor
-        c.block()
+fun JavaPlugin.registerCommands(vararg commands: Pair<String, CommandExecutor>) {
+    for (cmd in commands) {
+        registerCommand(cmd.first, cmd.second)
     }
 }
 
@@ -49,4 +50,19 @@ fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
     itemMetaCopy.block()
     itemMeta = itemMetaCopy
     return itemMeta
+}
+
+
+fun <T : Any> Configuration.getObjectList(entryClass: KClass<T>, path: String, def: List<T> = emptyList()): List<T> {
+    val result = ArrayList<T>()
+    for (entry in getList(path, def)) {
+        if (entry != null && entry::class == entryClass) {
+            result.add(entryClass.java.cast(entry))
+        }
+    }
+    return result
+}
+
+inline fun <reified T : Any> Configuration.getObjectList(path: String, def: List<T> = emptyList()): List<T> {
+    return getObjectList(T::class, path, def)
 }

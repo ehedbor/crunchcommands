@@ -18,6 +18,7 @@
 package org.hedbor.evan.crunchcommands.command
 
 import net.md_5.bungee.api.ChatColor
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -31,6 +32,7 @@ import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.util.itemMeta
 import org.hedbor.evan.crunchcommands.util.itemStack
+import kotlin.random.Random
 import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
@@ -41,7 +43,24 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 @Permission(name = "$PLUGIN_ID.dirt", desc = "Allows dirt command", defaultValue = PermissionDefault.TRUE)
 object CommandDirt : CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender is Player) {
+        if (args.isNotEmpty()) {
+            return false
+        }
+
+        if (sender !is Player) {
+            sender.sendMessage("${ChatColor.RED}Only players can use this command.")
+            return true
+        }
+
+        // 5% chance to send the player into the sky
+        val sendToHeaven = Random.nextInt(0, 100) >= 95
+        if (sendToHeaven) {
+            val oldLocation = sender.location
+            val blockLocation = Location(oldLocation.world, oldLocation.x, 255.0, oldLocation.z)
+            sender.world.getBlockAt(blockLocation).type = Material.DIRT
+            sender.teleport(blockLocation.add(0.0, 1.0, 0.0))
+            sender.sendMessage("${ChatColor.LIGHT_PURPLE}haha lol")
+        } else {
             val dirt = itemStack(Material.DIRT) {
                 amount = 3
                 addUnsafeEnchantment(Enchantment.DURABILITY, 1)
@@ -52,8 +71,6 @@ object CommandDirt : CommandExecutor {
             }
 
             sender.inventory.addItem(dirt)
-        } else {
-            sender.sendMessage("Only players can use this command.")
         }
 
         return true
