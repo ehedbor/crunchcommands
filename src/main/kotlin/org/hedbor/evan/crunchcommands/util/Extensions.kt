@@ -20,6 +20,7 @@ package org.hedbor.evan.crunchcommands.util
 import org.bukkit.Material
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.PluginCommand
+import org.bukkit.command.TabCompleter
 import org.bukkit.configuration.Configuration
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -30,6 +31,10 @@ import kotlin.reflect.KClass
 fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
     val c = getCommand(name)
     c.executor = executor
+    if (executor is TabCompleter) {
+        c.tabCompleter = executor
+    }
+
     c.block()
 }
 

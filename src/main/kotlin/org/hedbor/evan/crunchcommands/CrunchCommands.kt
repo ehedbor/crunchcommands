@@ -31,6 +31,7 @@ import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.command.CommandCtp
 import org.hedbor.evan.crunchcommands.command.CommandDirt
 import org.hedbor.evan.crunchcommands.command.CommandWarp
+import org.hedbor.evan.crunchcommands.command.CommandWarpList
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
 import org.hedbor.evan.crunchcommands.warp.Warp
@@ -57,7 +58,6 @@ class CrunchCommands : JavaPlugin() {
     companion object {
         internal const val PLUGIN_ID = "crunchcommands"
         internal const val PERM_MSG = "§cYou do not have permission to use this command."
-        internal const val CMD_USAGE = "§cUsage: /<command>"
 
         @Suppress("ObjectPropertyName")
         private var _instance: CrunchCommands? = null
@@ -71,7 +71,8 @@ class CrunchCommands : JavaPlugin() {
         registerCommands(
             "dirt" to CommandDirt,
             "ctp" to CommandCtp,
-            "warp" to CommandWarp
+            "warp" to CommandWarp,
+            "warps" to CommandWarpList
         )
 
         setupConfig()

@@ -17,6 +17,7 @@
 
 package org.hedbor.evan.crunchcommands.util
 
+import net.md_5.bungee.api.ChatColor
 import org.bukkit.command.CommandSender
 import kotlin.math.min
 
@@ -29,15 +30,17 @@ class Paginator(
     private val contents: List<String> = emptyList(),
     private val header: String? = null,
     private val footer: String? = null,
-    private val padding: String = "-"
+    private val padding: Char = '='
 ) {
     companion object {
         private const val ROW_WIDTH = 55
         private const val ITEMS_PER_PAGE = 8
-    }
 
-    init {
-        require(padding.isNotEmpty()) { "Padding must have a length of at least 1" }
+        private val R = ChatColor.RESET.toString()
+        private val PADDING_COLOR = ChatColor.DARK_GREEN.toString()
+        private val TITLE_COLOR = ChatColor.YELLOW.toString()
+        private val ENTRY_COLOR = ChatColor.GREEN.toString()
+        private val ARROW_COLOR = "${ChatColor.BLUE}${ChatColor.UNDERLINE}"
     }
 
     fun sendTo(sender: CommandSender, pageIndex: Int = 0) {
@@ -53,13 +56,13 @@ class Paginator(
             sender.sendMessage(repeatPadding(ROW_WIDTH))
         } else {
             val pad = repeatPadding((ROW_WIDTH - title.length - 2) / 2)
-            sender.sendMessage("$pad $title $pad")
+            sender.sendMessage("$pad$R $TITLE_COLOR$title$R $pad")
         }
     }
 
     private fun sendHeader(sender: CommandSender) {
         if (header != null) {
-            sender.sendMessage(header)
+            sender.sendMessage("$ENTRY_COLOR$header")
         }
     }
 
@@ -67,23 +70,32 @@ class Paginator(
         val startIndex = pageIndex * ITEMS_PER_PAGE
         val endIndex = min(startIndex + ITEMS_PER_PAGE, contents.size)
         if (startIndex in 0..contents.size) {
-            contents.subList(startIndex, endIndex).forEach(sender::sendMessage)
+            for (entry in contents.subList(startIndex, endIndex)) {
+                sender.sendMessage(" - $ENTRY_COLOR$entry")
+            }
         }
     }
 
     private fun sendBottomRow(sender: CommandSender, pageIndex: Int) {
         val currentPage = pageIndex + 1
         val pageCount = contents.size / ITEMS_PER_PAGE + 1
-        val pageInfo = "< $currentPage/$pageCount >"
-        val pad = repeatPadding((ROW_WIDTH - pageInfo.length - 2) / 2)
-        sender.sendMessage("$pad $pageInfo $pad")
+        val pageInfo = "$ARROW_COLOR<$R $PADDING_COLOR$currentPage/$pageCount$R $ARROW_COLOR>"
+        // The color codes do not actually affect the length of the rendered string
+        val pageInfoLength = "< $currentPage/$pageCount >".length
+
+        val pad = repeatPadding((ROW_WIDTH - pageInfoLength - 2) / 2)
+        sender.sendMessage("$pad$R $pageInfo$R $pad")
     }
 
     private fun sendFooter(sender: CommandSender) {
         if (footer != null) {
-            sender.sendMessage(footer)
+            sender.sendMessage("$ENTRY_COLOR$footer")
         }
     }
 
-    private fun repeatPadding(charCount: Int) = padding.repeat(charCount / padding.length)
+    private fun repeatPadding(charCount: Int): String {
+        var fullPadding = PADDING_COLOR
+        repeat(charCount) { fullPadding += padding }
+        return fullPadding
+    }
 }

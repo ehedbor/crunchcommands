@@ -26,7 +26,7 @@ import org.bukkit.command.CommandSender
  * Provides a basic framework for creating base commands.
  */
 abstract class BaseCommand(
-    private val subCommands: Map<String, SubCommand> = emptyMap()
+    protected val subCommands: Map<String, SubCommand> = emptyMap()
 ) : CommandExecutor {
 
     constructor(vararg subCommands: Pair<String, SubCommand>) : this(subCommands.toMap())

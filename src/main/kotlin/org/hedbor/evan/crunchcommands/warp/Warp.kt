@@ -33,6 +33,7 @@ data class Warp(val name: String, val location: Location) : ConfigurationSeriali
     }
 
     companion object {
+        @Suppress("unused")
         @JvmStatic
         fun deserialize(values: Map<String, Any>): Warp {
             val name = values["name"] as? String
@@ -41,7 +42,7 @@ data class Warp(val name: String, val location: Location) : ConfigurationSeriali
             requireNotNull(location) { "Location not preset" }
 
             @Suppress("UNCHECKED_CAST")
-            return Warp(name, Location.deserialize(location as Map<String, *>))
+            return Warp(name, Location.deserialize(location as MutableMap<String, Any>))
         }
     }
 }

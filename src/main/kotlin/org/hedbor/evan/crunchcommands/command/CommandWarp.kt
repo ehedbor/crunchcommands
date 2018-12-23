@@ -21,12 +21,12 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.annotation.permission.ChildPermission
 import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.CMD_USAGE
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.util.BaseCommand
@@ -39,7 +39,7 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 /**
  * Allows the creation, listation, and usation of warps.
  */
-@CommandYml(name = "warp", desc = "Warp base command", permission = "$PLUGIN_ID.warp", permissionMessage = PERM_MSG, usage = "$CMD_USAGE <create|list|use> [<...>]")
+@CommandYml(name = "warp", desc = "Warp base command", permission = "$PLUGIN_ID.warp", permissionMessage = PERM_MSG, usage = "/warp <create|list|use> [<...>]")
 @Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows creating, listing, and using warps.", defaultValue = PermissionDefault.OP, children = [
     ChildPermission(name = "$PLUGIN_ID.warp.create"),
     ChildPermission(name = "$PLUGIN_ID.warp.list"),
@@ -49,13 +49,28 @@ object CommandWarp : BaseCommand(
     "create" to CommandWarpCreate,
     "list" to CommandWarpList,
     "use" to CommandWarpUse
-) {
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        return super.onCommand(sender, command, label, args)
+), TabCompleter {
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String>? {
+        return when {
+            args.isEmpty() -> {
+                subCommands
+                    .map { it.key }
+                    .filter { subCommand -> sender.hasPermission("$PLUGIN_ID.warp.$subCommand") }
+            }
+            args[0] == "use" -> {
+                val warps = CrunchCommands.instance.warpManager.warps
+                val warpNames = warps.map { it.name }
+                warpNames
+            }
+            else -> emptyList()
+        }
     }
 }
 
+
+/**
+ * Sub-command to create a warp.
+ */
 @Permission(name = "$PLUGIN_ID.warp.create", desc = "Allows creation of warps", defaultValue = PermissionDefault.FALSE)
 object CommandWarpCreate : SubCommand("$PLUGIN_ID.warp.create", isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
@@ -83,10 +98,16 @@ object CommandWarpCreate : SubCommand("$PLUGIN_ID.warp.create", isPlayersOnly = 
     private fun Location.toReadableString() = "($blockX, $blockY, $blockZ)"
 }
 
+
+/**
+ * Sub-command to list all warps. Also aliased as the base command `/warps`.
+ */
+@CommandYml(name = "warps", desc = "List all warps.", permission = "$PLUGIN_ID.warp.list", permissionMessage = PERM_MSG, usage = "/warps [<page>]")
 @Permission(name = "$PLUGIN_ID.warp.list", desc = "Allows listing of warps", defaultValue = PermissionDefault.TRUE)
 object CommandWarpList : SubCommand("$PLUGIN_ID.warp.list") {
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
         val usageMessage = "${ChatColor.RED}Usage: /warp list [<page>]"
+
         val pageNumber = when (args.size) {
             // defaults to page 1
             0 -> 1
@@ -114,6 +135,10 @@ object CommandWarpList : SubCommand("$PLUGIN_ID.warp.list") {
     }
 }
 
+
+/**
+ * Sub-command to use a warp.
+ */
 @Permission(name = "$PLUGIN_ID.warp.use", desc = "Allows using of warps", defaultValue = PermissionDefault.TRUE)
 object CommandWarpUse : SubCommand("$PLUGIN_ID.warp.use", isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): Boolean {
