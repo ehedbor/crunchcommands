@@ -15,35 +15,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.hedbor.evan.crunchcommands.util
+package org.hedbor.evan.crunchcommands.command
 
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.hedbor.evan.crunchcommands.CrunchCommands
 
 
 /**
  * Provides a basic framework for creating base commands.
  */
 abstract class BaseCommand(
+    plugin: CrunchCommands,
     protected val subCommands: Map<String, SubCommand> = emptyMap()
-) : CommandExecutor {
+) : CrunchCommand(plugin) {
 
-    constructor(vararg subCommands: Pair<String, SubCommand>) : this(subCommands.toMap())
+    constructor(plugin: CrunchCommands, vararg subCommands: Pair<String, SubCommand>) : this(plugin, subCommands.toMap())
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
+    override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
+        val result = super.execute(sender, args)
+        if (result !is CommandResult.Success) {
+            return result
+        }
+
         if (args.isEmpty()) {
-            return false
+            return CommandResult.IncorrectUsage()
         }
 
         val subCommandName = args[0]
         val subCommand = subCommands[subCommandName]
 
-        return if (subCommand == null) {
-            false
-        } else {
-            subCommand.onCommand(sender, command, label, args.copyOfRange(1, args.size))
-            true
-        }
+        return subCommand?.execute(sender, args.copyOfRange(1, args.size))
+            ?: CommandResult.IncorrectUsage()
     }
 }

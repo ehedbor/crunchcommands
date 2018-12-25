@@ -20,13 +20,12 @@ package org.hedbor.evan.crunchcommands.command
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.annotation.permission.Permission
+import org.hedbor.evan.crunchcommands.CrunchCommands
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.util.itemMeta
@@ -40,15 +39,16 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
  */
 @CommandYml(name = "dirt", desc = "Dispenses emergency dirt.", permission = "$PLUGIN_ID.dirt", permissionMessage = PERM_MSG, usage = "/dirt")
 @Permission(name = "$PLUGIN_ID.dirt", desc = "Allows dirt command", defaultValue = PermissionDefault.TRUE)
-object CommandDirt : CommandExecutor {
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (args.isNotEmpty()) {
-            return false
+class CommandDirt(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
+    override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
+        val result = super.execute(sender, args)
+        if (result !is CommandResult.Success) {
+            return result
         }
+        sender as Player
 
-        if (sender !is Player) {
-            sender.sendMessage("${ChatColor.RED}Only players can use this command.")
-            return true
+        if (args.isNotEmpty()) {
+            return CommandResult.IncorrectUsage()
         }
 
         // 5% chance to send the player into the sky
@@ -72,6 +72,6 @@ object CommandDirt : CommandExecutor {
             sender.inventory.addItem(dirt)
         }
 
-        return true
+        return CommandResult.Success
     }
 }

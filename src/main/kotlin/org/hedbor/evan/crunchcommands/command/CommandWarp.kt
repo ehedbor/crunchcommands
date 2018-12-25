@@ -17,21 +17,16 @@
 
 package org.hedbor.evan.crunchcommands.command
 
-import net.md_5.bungee.api.ChatColor
 import org.bukkit.Location
-import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.permission.ChildPermission
 import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
-import org.hedbor.evan.crunchcommands.util.BaseCommand
 import org.hedbor.evan.crunchcommands.util.Paginator
-import org.hedbor.evan.crunchcommands.util.SubCommand
 import org.hedbor.evan.crunchcommands.warp.Warp
 import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
@@ -40,29 +35,35 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
  * Allows the creation, listation, and usation of warps.
  */
 @CommandYml(name = "warp", desc = "Warp base command", permission = "$PLUGIN_ID.warp", permissionMessage = PERM_MSG, usage = "/warp <create|list|use> [<...>]")
-@Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows creating, listing, and using warps.", defaultValue = PermissionDefault.OP, children = [
-    ChildPermission(name = "$PLUGIN_ID.warp.create"),
-    ChildPermission(name = "$PLUGIN_ID.warp.list"),
-    ChildPermission(name = "$PLUGIN_ID.warp.use")
-])
-object CommandWarp : BaseCommand(
-    "create" to CommandWarpCreate,
-    "list" to CommandWarpList,
-    "use" to CommandWarpUse
+class CommandWarp(plugin: CrunchCommands) : BaseCommand(
+    plugin,
+    "create" to CommandWarpCreate(plugin),
+    "list" to CommandWarpList(plugin),
+    "use" to CommandWarpUse(plugin)
 ), TabCompleter {
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String>? {
-        return when {
-            args.isEmpty() -> {
-                subCommands
-                    .map { it.key }
-                    .filter { subCommand -> sender.hasPermission("$PLUGIN_ID.warp.$subCommand") }
+    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? = when {
+        args.isEmpty() -> {
+            subCommands
+                .map { it.key }
+                .filter { subCommand -> sender.hasPermission("$PLUGIN_ID.warp.$subCommand") }
+        }
+        else -> {
+            val subCommand = args[0]
+            when {
+                subCommand == "use" -> {
+                    val warpName = args.getOrElse(1) { "" }
+                    plugin.warpManager.warps
+                        .map { it.name }
+                        .filter { it.startsWith(warpName) }
+                }
+                args.size == 1 -> {
+                    subCommands
+                        .map { it.key }
+                        .filter { sender.hasPermission("$PLUGIN_ID.warp.$it") }
+                        .filter { it.startsWith(subCommand) }
+                }
+                else -> emptyList()
             }
-            args[0] == "use" -> {
-                val warps = CrunchCommands.instance.warpManager.warps
-                val warpNames = warps.map { it.name }
-                warpNames
-            }
-            else -> emptyList()
         }
     }
 }
@@ -72,27 +73,28 @@ object CommandWarp : BaseCommand(
  * Sub-command to create a warp.
  */
 @Permission(name = "$PLUGIN_ID.warp.create", desc = "Allows creation of warps", defaultValue = PermissionDefault.FALSE)
-object CommandWarpCreate : SubCommand("$PLUGIN_ID.warp.create", isPlayersOnly = true) {
-    override fun execute(sender: CommandSender, args: Array<String>): Boolean {
+class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.create", true) {
+    override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
+        val result = super.execute(sender, args)
+        if (result !is CommandResult.Success) return result
+        sender as Player
 
-        // must provide the warp name
         if (args.size != 1) {
-            sender.sendMessage("${ChatColor.RED}Usage: /warp create <name>")
-            return true
+            return CommandResult.IncorrectUsage("Usage: /warp create <name>")
         }
         val warpName = args[0]
 
-        val warpManager = CrunchCommands.instance.warpManager
+        val warpManager = plugin.warpManager
         if (warpManager.getWarp(warpName) != null) {
-            sender.sendMessage("${ChatColor.RED}Warp \"$warpName\" already exists.")
-            return true
+            return CommandResult.WarpAlreadyExists(warpName)
         }
 
-        val loc = (sender as Player).location
-        warpManager.addWarp(Warp(warpName, loc))
-        sender.sendMessage("Successfully created warp \"$warpName\" at ${loc.toReadableString()}.")
+        val loc = sender.location
+        val creator = sender.uniqueId
+        warpManager.addWarp(Warp(warpName, loc, creator))
 
-        return true
+        sender.sendMessage("Successfully created warp \"$warpName\" at ${loc.toReadableString()}.")
+        return CommandResult.Success
     }
 
     private fun Location.toReadableString() = "($blockX, $blockY, $blockZ)"
@@ -104,34 +106,26 @@ object CommandWarpCreate : SubCommand("$PLUGIN_ID.warp.create", isPlayersOnly = 
  */
 @CommandYml(name = "warps", desc = "List all warps.", permission = "$PLUGIN_ID.warp.list", permissionMessage = PERM_MSG, usage = "/warps [<page>]")
 @Permission(name = "$PLUGIN_ID.warp.list", desc = "Allows listing of warps", defaultValue = PermissionDefault.TRUE)
-object CommandWarpList : SubCommand("$PLUGIN_ID.warp.list") {
-    override fun execute(sender: CommandSender, args: Array<String>): Boolean {
-        val usageMessage = "${ChatColor.RED}Usage: /warp list [<page>]"
+class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.list") {
+    override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
+        val result = super.execute(sender, args)
+        if (result !is CommandResult.Success) return result
+
+        val usageMessage = "Usage: /warp list [<page>]"
 
         val pageNumber = when (args.size) {
             // defaults to page 1
             0 -> 1
             // use the provided page number if explicitly mentioned
-            1 -> {
-                val pageOrNull = args[0].toIntOrNull()
-                if (pageOrNull == null) {
-                    sender.sendMessage(usageMessage)
-                    return true
-                }
-                pageOrNull
-            }
-            else -> {
-                sender.sendMessage(usageMessage)
-                return true
-            }
+            1 -> args[0].toIntOrNull() ?: return CommandResult.IncorrectUsage(usageMessage)
+            else -> return CommandResult.IncorrectUsage(usageMessage)
         }
 
-        val warpManager = CrunchCommands.instance.warpManager
-        val allWarps = warpManager.warps.map { it.name }.sorted()
+        val allWarps = plugin.warpManager.warps.map { it.name }.sorted()
         val paginator = Paginator(title = "All Warps", contents = allWarps)
         paginator.sendTo(sender, pageNumber - 1)
 
-        return true
+        return CommandResult.Success
     }
 }
 
@@ -140,25 +134,24 @@ object CommandWarpList : SubCommand("$PLUGIN_ID.warp.list") {
  * Sub-command to use a warp.
  */
 @Permission(name = "$PLUGIN_ID.warp.use", desc = "Allows using of warps", defaultValue = PermissionDefault.TRUE)
-object CommandWarpUse : SubCommand("$PLUGIN_ID.warp.use", isPlayersOnly = true) {
-    override fun execute(sender: CommandSender, args: Array<String>): Boolean {
+class CommandWarpUse(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.use",  true) {
+    override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
+        // validate preconditions
+        val result = super.execute(sender, args)
+        if (result !is CommandResult.Success) return result
+        sender as Player
+
         // must provide the warp name
         if (args.size != 1) {
-            sender.sendMessage("${ChatColor.RED}Usage: /warp use <name>")
-            return true
+            return CommandResult.IncorrectUsage("Usage: /warp use <name>")
         }
         val warpName = args[0]
 
-        val warp = CrunchCommands.instance.warpManager.getWarp(warpName)
-        if (warp == null) {
-            sender.sendMessage("${ChatColor.RED}Warp \"$warpName\" does not exist.")
-            return true
-        }
+        val warp = plugin.warpManager.getWarp(warpName) ?: return CommandResult.WarpDoesNotExist(warpName)
 
-        sender as Player
         sender.teleport(warp.location)
         sender.sendMessage("Whoosh!")
 
-        return true
+        return CommandResult.Success
     }
 }

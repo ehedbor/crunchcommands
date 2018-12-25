@@ -50,6 +50,11 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
         ChildPermission(name = "$PLUGIN_ID.dirt"),
         ChildPermission(name = "$PLUGIN_ID.ctp"),
         ChildPermission(name = "$PLUGIN_ID.warp.*")
+    ]),
+    Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows creating, listing, and using warps.", defaultValue = PermissionDefault.OP, children = [
+        ChildPermission(name = "$PLUGIN_ID.warp.create"),
+        ChildPermission(name = "$PLUGIN_ID.warp.list"),
+        ChildPermission(name = "$PLUGIN_ID.warp.use")
     ])
 ])
 class CrunchCommands : JavaPlugin() {
@@ -58,21 +63,15 @@ class CrunchCommands : JavaPlugin() {
     companion object {
         internal const val PLUGIN_ID = "crunchcommands"
         internal const val PERM_MSG = "§cYou do not have permission to use this command."
-
-        @Suppress("ObjectPropertyName")
-        private var _instance: CrunchCommands? = null
-        val instance: CrunchCommands
-            get() = _instance ?: throw IllegalStateException("Plugin instance does not exist.")
+        internal const val PLAYERS_ONLY_MSG = "§cOnly players can use this command."
     }
 
     override fun onEnable() {
-        _instance = this
-
         registerCommands(
-            "dirt" to CommandDirt,
-            "ctp" to CommandCtp,
-            "warp" to CommandWarp,
-            "warps" to CommandWarpList
+            "dirt" to CommandDirt(this),
+            "ctp" to CommandCtp(this),
+            "warp" to CommandWarp(this),
+            "warps" to CommandWarpList(this)
         )
 
         setupConfig()

@@ -19,16 +19,18 @@ package org.hedbor.evan.crunchcommands.warp
 
 import org.bukkit.Location
 import org.bukkit.configuration.serialization.ConfigurationSerializable
+import java.util.*
 
 
 /**
  * Represents a warp with a name and location.
  */
-data class Warp(val name: String, val location: Location) : ConfigurationSerializable {
+data class Warp(val name: String, val location: Location, val creator: UUID) : ConfigurationSerializable {
     override fun serialize(): MutableMap<String, Any> {
         return mutableMapOf(
             "name" to name,
-            "location" to location.serialize()
+            "location" to location.serialize(),
+            "creator" to creator.toString()
         )
     }
 
@@ -38,11 +40,18 @@ data class Warp(val name: String, val location: Location) : ConfigurationSeriali
         fun deserialize(values: Map<String, Any>): Warp {
             val name = values["name"] as? String
             val location = values["location"] as? Map<*, *>
+            val creator = values["creator"] as? String
+
             requireNotNull(name) { "Name not present" }
-            requireNotNull(location) { "Location not preset" }
+            requireNotNull(location) { "Location not present" }
+            requireNotNull(creator) { "Creator not present" }
 
             @Suppress("UNCHECKED_CAST")
-            return Warp(name, Location.deserialize(location as MutableMap<String, Any>))
+            return Warp(
+                name = name,
+                location = Location.deserialize(location as MutableMap<String, Any>),
+                creator = UUID.fromString(creator)
+            )
         }
     }
 }
