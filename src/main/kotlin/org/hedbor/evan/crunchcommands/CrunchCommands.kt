@@ -85,7 +85,7 @@ class CrunchCommands : JavaPlugin() {
         config.addDefault("warps", emptyList<Warp>())
 
         val warps = config.getObjectList<Warp>("warps")
-        warpManager = WarpManager(warps)
+        warpManager = WarpManager(this, warps)
     }
 
     override fun saveConfig() {

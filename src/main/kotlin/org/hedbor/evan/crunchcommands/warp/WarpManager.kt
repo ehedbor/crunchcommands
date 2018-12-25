@@ -17,11 +17,13 @@
 
 package org.hedbor.evan.crunchcommands.warp
 
+import org.hedbor.evan.crunchcommands.CrunchCommands
+
 
 /**
  * Responsible for managing the list of warps and their locations.
  */
-class WarpManager(warps: List<Warp> = emptyList()) {
+class WarpManager(val plugin: CrunchCommands, warps: List<Warp> = emptyList()) {
     var warps = warps
         private set
 
@@ -37,6 +39,7 @@ class WarpManager(warps: List<Warp> = emptyList()) {
             false
         } else {
             warps += warp
+            plugin.saveConfig()
             true
         }
     }
