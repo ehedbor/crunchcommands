@@ -19,8 +19,6 @@ package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
 import org.hedbor.evan.crunchcommands.warp.Warp
 
@@ -30,7 +28,6 @@ import org.hedbor.evan.crunchcommands.warp.Warp
  *
  * @see CommandWarp
  */
-@Permission(name = "${CrunchCommands.PLUGIN_ID}.warp.create", desc = "Allows creation of warps", defaultValue = PermissionDefault.FALSE)
 class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.create", true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)

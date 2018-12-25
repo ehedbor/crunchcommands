@@ -18,8 +18,6 @@
 package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
-import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
@@ -27,7 +25,6 @@ import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 /**
  * Allows warps to be removed.
  */
-@Permission(name = "$PLUGIN_ID.warp.remove", desc = "Allows warp removal.", defaultValue = PermissionDefault.FALSE)
 class CommandWarpRemove(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.remove") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)

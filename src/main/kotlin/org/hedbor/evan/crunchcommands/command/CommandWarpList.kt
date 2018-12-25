@@ -18,9 +18,6 @@
 package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
-import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.command.Command
-import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
 import org.hedbor.evan.crunchcommands.util.Paginator
 
@@ -30,8 +27,6 @@ import org.hedbor.evan.crunchcommands.util.Paginator
  *
  * @see CommandWarp
  */
-@Command(name = "warps", desc = "List all warps.", permission = "${CrunchCommands.PLUGIN_ID}.warp.list", permissionMessage = CrunchCommands.PERM_MSG, usage = "/warps [<page>]")
-@Permission(name = "${CrunchCommands.PLUGIN_ID}.warp.list", desc = "Allows listing of warps", defaultValue = PermissionDefault.TRUE)
 class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.list") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)

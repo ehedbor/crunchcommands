@@ -19,9 +19,7 @@ package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
-import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
 /**
@@ -32,7 +30,6 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
  * @see CommandWarpUse
  * @see CommandWarpRemove
  */
-@CommandYml(name = "warp", desc = "Warp base command", permission = "$PLUGIN_ID.warp", permissionMessage = PERM_MSG, usage = "/warp <create|list|use> [<...>]")
 class CommandWarp(plugin: CrunchCommands) : BaseCommand(
     plugin,
     mapOf(

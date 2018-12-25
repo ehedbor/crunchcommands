@@ -21,19 +21,12 @@ import net.md_5.bungee.api.ChatColor
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
-import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
 /**
  * Teleports the caller to the specified player.
  */
-@CommandYml(name = "ctp", desc = "Teleports to another player.", permission = "$PLUGIN_ID.ctp", permissionMessage = PERM_MSG, usage = "/ctp <name>")
-@Permission(name = "$PLUGIN_ID.ctp", desc = "Allows ctp command", defaultValue = PermissionDefault.TRUE)
 class CommandCtp(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)

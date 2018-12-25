@@ -18,16 +18,7 @@
 package org.hedbor.evan.crunchcommands
 
 import org.bukkit.configuration.serialization.ConfigurationSerialization
-import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.plugin.java.annotation.permission.ChildPermission
-import org.bukkit.plugin.java.annotation.permission.Permission
-import org.bukkit.plugin.java.annotation.permission.Permissions
-import org.bukkit.plugin.java.annotation.plugin.ApiVersion
-import org.bukkit.plugin.java.annotation.plugin.Description
-import org.bukkit.plugin.java.annotation.plugin.Plugin
-import org.bukkit.plugin.java.annotation.plugin.author.Author
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.command.CommandCtp
 import org.hedbor.evan.crunchcommands.command.CommandDirt
 import org.hedbor.evan.crunchcommands.command.CommandWarp
@@ -41,23 +32,6 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
 /**
  * The main plugin class.
  */
-@Plugin(name = "CrunchCommands", version = "@VERSION@")
-@Author("Evan Hedbor")
-@Description("A Spigot version of CrunchCommands!")
-@ApiVersion(ApiVersion.Target.v1_13)
-@Permissions(value = [
-    Permission(name = "$PLUGIN_ID.*", desc = "Wildcard permission", defaultValue = PermissionDefault.OP, children = [
-        ChildPermission(name = "$PLUGIN_ID.dirt"),
-        ChildPermission(name = "$PLUGIN_ID.ctp"),
-        ChildPermission(name = "$PLUGIN_ID.warp.*")
-    ]),
-    Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows full control over all warps.", defaultValue = PermissionDefault.OP, children = [
-        ChildPermission(name = "$PLUGIN_ID.warp.create"),
-        ChildPermission(name = "$PLUGIN_ID.warp.list"),
-        ChildPermission(name = "$PLUGIN_ID.warp.use"),
-        ChildPermission(name = "$PLUGIN_ID.warp.remove")
-    ])
-])
 class CrunchCommands : JavaPlugin() {
     lateinit var warpManager: WarpManager
 

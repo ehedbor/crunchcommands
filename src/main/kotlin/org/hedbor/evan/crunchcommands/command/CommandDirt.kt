@@ -23,22 +23,15 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.permissions.PermissionDefault
-import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PERM_MSG
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.util.itemMeta
 import org.hedbor.evan.crunchcommands.util.itemStack
 import kotlin.random.Random
-import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
 /**
  * Gives the user some emergency dirt.
  */
-@CommandYml(name = "dirt", desc = "Dispenses emergency dirt.", permission = "$PLUGIN_ID.dirt", permissionMessage = PERM_MSG, usage = "/dirt")
-@Permission(name = "$PLUGIN_ID.dirt", desc = "Allows dirt command", defaultValue = PermissionDefault.TRUE)
 class CommandDirt(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)

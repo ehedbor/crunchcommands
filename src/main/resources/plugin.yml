@@ -1,0 +1,65 @@
+main: org.hedbor.evan.crunchcommands.CrunchCommands
+name: CrunchCommands
+author: Evan Hedbor
+description: A Spigot version of CrunchCommands!
+version: @VERSION@
+api-version: 1.13
+commands:
+    dirt:
+        usage: /dirt
+        description: Dispenses emergency dirt.
+        permission: crunchcommands.dirt
+        permission-message: §cYou do not have permission to use this command.
+    ctp:
+        usage: /ctp <name>
+        description: Teleports to another player.
+        permission: crunchcommands.ctp
+        permission-message: §cYou do not have permission to use this command.
+    warp:
+        usage: /warp <create|list|remove|use> [<...>]
+        description: Warp base command
+        permission: crunchcommands.warp
+        permission-message: §cYou do not have permission to use this command.
+    warps:
+        usage: /warps [<page>]
+        description: Alias for /warp list
+        permission: crunchcommands.warp.list
+        permission-message: §cYou do not have permission to use this command.
+permissions:
+    crunchcommands.dirt:
+        description: Allows dirt command
+        default: true
+    crunchcommands.ctp:
+        description: Allows ctp command
+        default: true
+    crunchcommands.warp:
+        description: Allows base warp command
+        default: true
+    crunchcommands.warp.create:
+        description:  Allows creation of warps
+        default: op
+    crunchcommand.warp.remove:
+        description: Allows removal of warps
+        default: op
+    crunchcommands.warp.list:
+        description: Allows listing all warps
+        default: true
+    crunchcommands.warp.use:
+        description: Allows using of warps
+        default: true
+    crunchcommands.warp.*:
+        description: Allows full control over warps
+        default: op
+        children:
+            - crunchcommands.warp
+            - crunchcommands.warp.create
+            - crunchcommands.warp.remove
+            - crunchcommands.warp.list
+            - crunchcommands.warp.use
+  crunchcommands.*:
+      description: Wildcard permission
+      default: op
+      children:
+          - crunchcommands.dirt
+          - crunchcommands.ctp
+          - crunchcommands.warp.*

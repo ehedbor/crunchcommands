@@ -19,27 +19,24 @@ package org.hedbor.evan.crunchcommands.util
 
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.command.CommandExecutor
 import org.bukkit.command.PluginCommand
-import org.bukkit.command.TabCompleter
 import org.bukkit.configuration.Configuration
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.java.JavaPlugin
+import org.hedbor.evan.crunchcommands.command.CrunchCommand
 import kotlin.reflect.KClass
 
 
-internal fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
+internal fun JavaPlugin.registerCommand(name: String, cmd: CrunchCommand? = null, block: PluginCommand.() -> Unit = {}) {
     val c = getCommand(name)
-    c.executor = executor
-    if (executor is TabCompleter) {
-        c.tabCompleter = executor
-    }
+    c.executor = cmd
+    c.tabCompleter = cmd
 
     c.block()
 }
 
-internal fun JavaPlugin.registerCommands(vararg commands: Pair<String, CommandExecutor>) {
+internal fun JavaPlugin.registerCommands(vararg commands: Pair<String, CrunchCommand>) {
     for (cmd in commands) {
         registerCommand(cmd.first, cmd.second)
     }
