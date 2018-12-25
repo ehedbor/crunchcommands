@@ -63,7 +63,6 @@ class CrunchCommands : JavaPlugin() {
     companion object {
         internal const val PLUGIN_ID = "crunchcommands"
         internal const val PERM_MSG = "§cYou do not have permission to use this command."
-        internal const val PLAYERS_ONLY_MSG = "§cOnly players can use this command."
     }
 
     override fun onEnable() {
