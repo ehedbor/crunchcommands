@@ -17,6 +17,7 @@
 
 package org.hedbor.evan.crunchcommands.util
 
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.PluginCommand
@@ -28,7 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import kotlin.reflect.KClass
 
 
-fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
+internal fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, block: PluginCommand.() -> Unit = {}) {
     val c = getCommand(name)
     c.executor = executor
     if (executor is TabCompleter) {
@@ -38,19 +39,19 @@ fun JavaPlugin.registerCommand(name: String, executor: CommandExecutor? = null, 
     c.block()
 }
 
-fun JavaPlugin.registerCommands(vararg commands: Pair<String, CommandExecutor>) {
+internal fun JavaPlugin.registerCommands(vararg commands: Pair<String, CommandExecutor>) {
     for (cmd in commands) {
         registerCommand(cmd.first, cmd.second)
     }
 }
 
-fun itemStack(material: Material, block: ItemStack.() -> Unit = {}): ItemStack {
+internal fun itemStack(material: Material, block: ItemStack.() -> Unit = {}): ItemStack {
     val stack = ItemStack(material)
     stack.block()
     return stack
 }
 
-fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
+internal fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
     val itemMetaCopy = itemMeta
     itemMetaCopy.block()
     itemMeta = itemMetaCopy
@@ -58,7 +59,7 @@ fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
 }
 
 
-fun <T : Any> Configuration.getObjectList(entryClass: KClass<T>, path: String, def: List<T> = emptyList()): List<T> {
+internal fun <T : Any> Configuration.getObjectList(entryClass: KClass<T>, path: String, def: List<T> = emptyList()): List<T> {
     val result = ArrayList<T>()
     for (entry in getList(path, def)) {
         if (entry != null && entry::class == entryClass) {
@@ -68,6 +69,8 @@ fun <T : Any> Configuration.getObjectList(entryClass: KClass<T>, path: String, d
     return result
 }
 
-inline fun <reified T : Any> Configuration.getObjectList(path: String, def: List<T> = emptyList()): List<T> {
+internal inline fun <reified T : Any> Configuration.getObjectList(path: String, def: List<T> = emptyList()): List<T> {
     return getObjectList(T::class, path, def)
 }
+
+internal fun Location.toReadableString() = "($blockX, $blockY, $blockZ)"

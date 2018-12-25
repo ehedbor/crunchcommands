@@ -39,6 +39,11 @@ abstract class CrunchCommand(
     protected val isPlayersOnly: Boolean = false
 ) : CommandExecutor, TabCompleter {
 
+    companion object {
+        internal val SUCCESS_COLOR = ChatColor.YELLOW
+        internal val FAILURE_COLOR = ChatColor.RED
+    }
+
     /**
      * Executes the command.
      *
@@ -47,29 +52,31 @@ abstract class CrunchCommand(
     final override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         val result = execute(sender, args)
 
-        return if (result == CommandResult.Success) {
-            true
-        } else {
-            if (result.message != null) {
-                sender.sendMessage("" + ChatColor.RED + result.message)
-            }
-
-            return !(result is CommandResult.IncorrectUsage && result.message != null)
+        val chatColor = when (result) {
+            is Success -> SUCCESS_COLOR
+            is Failure -> FAILURE_COLOR
         }
+
+        if (result.message != null) {
+            sender.sendMessage("$chatColor${result.message}")
+        }
+
+        val shouldShowUsage = (result is Failure.IncorrectUsage && result.message == null)
+        return !shouldShowUsage
     }
 
     /**
      * Executes the command.
      *
-     * @return [CommandResult.Success] if the command was used correctly.
+     * @return [Success] if the command was used correctly.
      */
     open fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         return if (isPlayersOnly && sender !is Player) {
-            CommandResult.PlayersOnly
+            Failure.PlayersOnly()
         } else if (!sender.hasPermission(permission)) {
-            CommandResult.NoPermission
+            Failure.NoPermission()
         } else {
-            CommandResult.Success
+            Success.Generic()
         }
     }
 

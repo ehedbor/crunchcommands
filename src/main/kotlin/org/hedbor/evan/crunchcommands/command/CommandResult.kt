@@ -17,18 +17,44 @@
 
 package org.hedbor.evan.crunchcommands.command
 
+import net.md_5.bungee.api.ChatColor
+import org.hedbor.evan.crunchcommands.util.toReadableString
+import org.hedbor.evan.crunchcommands.warp.Warp
+
+
+// Note: a null message means that nothing should be displayed to the user.
 
 /**
  * Indicates the success or failure of a [CrunchCommand].
  */
-sealed class CommandResult(val message: String? = null) {
-    object Success : CommandResult()
+sealed class CommandResult(val message: String? = null)
 
-    class IncorrectUsage(usage: String? = null) : CommandResult(usage)
-    object PlayersOnly : CommandResult("Only players can use this command.")
-    object NoPermission : CommandResult("You do not have permission to use this command.")
-    class WarpAlreadyExists(warpName: String) : CommandResult("Warp \"$warpName\" already exists.")
-    class WarpDoesNotExist(warpName: String) : CommandResult("Warp \"$warpName\" does not exist.")
-    object PlayerNotFound : CommandResult("No player found with that name.")
-    object MultiplePlayersFound : CommandResult("Multiple players found with that name.")
+
+/**
+ * Indicates that a [CrunchCommand] succeeded.
+ */
+sealed class Success(message: String? = null) : CommandResult(message) {
+    class Generic : Success("Command succeeded successfully.")
+    class DirtReceived : Success("You have received: ${ChatColor.RED}EMERGENCY DIRT${CrunchCommand.SUCCESS_COLOR}!")
+    class SentToHeaven : Success("${ChatColor.LIGHT_PURPLE}haha lol welcome to the sky")
+    class TeleportedToPlayer(playerName: String) : Success("You teleported to $playerName.")
+    class WarpCreated(warp: Warp) : Success("Successfully created warp \"${warp.name}\" at ${warp.location.toReadableString()}.")
+    class WarpRemoved(warp: Warp) : Success("Successfully removed warp \"${warp.name}\" at ${warp.location.toReadableString()}.")
+    class WarpsListed : Success()
+    class WarpUsed : Success("Whoosh!")
+}
+
+
+/**
+ * Indicates that a [CrunchCommand] failed.
+ */
+sealed class Failure(message: String? = null) : CommandResult(message) {
+    class Generic : Failure("Command failed successfully.")
+    class IncorrectUsage(usage: String? = null) : Failure(usage)
+    class MultiplePlayersFound : Failure("Multiple players found with that name.")
+    class NoPermission : Failure("You do not have permission to use this command.")
+    class PlayerNotFound : Failure("No player found with that name.")
+    class PlayersOnly : Failure("Only players can use this command.")
+    class WarpAlreadyExists(warpName: String) : Failure("Warp \"$warpName\" already exists.")
+    class WarpDoesNotExist(warpName: String) : Failure("Warp \"$warpName\" does not exist.")
 }

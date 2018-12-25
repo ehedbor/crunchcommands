@@ -29,22 +29,19 @@ abstract class BaseCommand(
     protected val subCommands: Map<String, SubCommand> = emptyMap()
 ) : CrunchCommand(plugin) {
 
-    constructor(plugin: CrunchCommands, vararg subCommands: Pair<String, SubCommand>) : this(plugin, subCommands.toMap())
-
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
-        if (result !is CommandResult.Success) {
+        if (result is Failure) {
             return result
         }
 
         if (args.isEmpty()) {
-            return CommandResult.IncorrectUsage()
+            return Failure.IncorrectUsage()
         }
 
         val subCommandName = args[0]
         val subCommand = subCommands[subCommandName]
 
-        return subCommand?.execute(sender, args.copyOfRange(1, args.size))
-            ?: CommandResult.IncorrectUsage()
+        return subCommand?.execute(sender, args.copyOfRange(1, args.size)) ?: Failure.IncorrectUsage()
     }
 }

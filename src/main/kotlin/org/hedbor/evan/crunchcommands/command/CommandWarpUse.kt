@@ -34,20 +34,20 @@ class CommandWarpUse(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchComma
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         // validate preconditions
         val result = super.execute(sender, args)
-        if (result !is CommandResult.Success) return result
+        if (result is Failure) return result
         sender as Player
 
         // must provide the warp name
         if (args.size != 1) {
-            return CommandResult.IncorrectUsage("Usage: /warp use <name>")
+            return Failure.IncorrectUsage("Usage: /warp use <name>")
         }
         val warpName = args[0]
 
-        val warp = plugin.warpManager.getWarp(warpName) ?: return CommandResult.WarpDoesNotExist(warpName)
+        val warp = plugin.warpManager.getWarp(warpName) ?: return Failure.WarpDoesNotExist(warpName)
 
         sender.teleport(warp.location)
         sender.sendMessage("Whoosh!")
 
-        return CommandResult.Success
+        return Success.WarpUsed()
     }
 }

@@ -35,7 +35,7 @@ import org.hedbor.evan.crunchcommands.util.Paginator
 class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.list") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
-        if (result !is CommandResult.Success) return result
+        if (result is Failure) return result
 
         val usageMessage = "Usage: /warp list [<page>]"
 
@@ -43,14 +43,14 @@ class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchComm
             // defaults to page 1
             0 -> 1
             // use the provided page number if explicitly mentioned
-            1 -> args[0].toIntOrNull() ?: return CommandResult.IncorrectUsage(usageMessage)
-            else -> return CommandResult.IncorrectUsage(usageMessage)
+            1 -> args[0].toIntOrNull() ?: return Failure.IncorrectUsage(usageMessage)
+            else -> return Failure.IncorrectUsage(usageMessage)
         }
 
         val allWarps = plugin.warpManager.warps.map { it.name }.sorted()
         val paginator = Paginator(title = "All Warps", contents = allWarps)
         paginator.sendTo(sender, pageNumber - 1)
 
-        return CommandResult.Success
+        return Success.WarpsListed()
     }
 }

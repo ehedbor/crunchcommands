@@ -18,39 +18,34 @@
 package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.permissions.PermissionDefault
 import org.bukkit.plugin.java.annotation.permission.Permission
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.warp.Warp
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
 
 /**
- * Sub-command to create a warp.
- *
- * @see CommandWarp
+ * Allows warps to be removed.
  */
-@Permission(name = "${CrunchCommands.PLUGIN_ID}.warp.create", desc = "Allows creation of warps", defaultValue = PermissionDefault.FALSE)
-class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.create", true) {
+@Permission(name = "$PLUGIN_ID.warp.remove", desc = "Allows warp removal.", defaultValue = PermissionDefault.FALSE)
+class CommandWarpRemove(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.remove") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
-        if (result is Failure) return result
-        sender as Player
+        if (result is Failure) {
+            return result
+        }
 
         if (args.size != 1) {
-            return Failure.IncorrectUsage("Usage: /warp create <name>")
+            return Failure.IncorrectUsage("Usage: /warp remove <name>")
         }
+
         val warpName = args[0]
+        val warp = plugin.warpManager.removeWarp(warpName)
 
-        val warpManager = plugin.warpManager
-        if (warpManager.getWarp(warpName) != null) {
-            return Failure.WarpAlreadyExists(warpName)
+        return if (warp != null) {
+            Success.WarpRemoved(warp)
+        } else {
+            Failure.WarpDoesNotExist(warpName)
         }
-
-        val warp = Warp(warpName, sender.location, sender.uniqueId)
-        warpManager.addWarp(warp)
-
-        return Success.WarpCreated(warp)
     }
-
 }

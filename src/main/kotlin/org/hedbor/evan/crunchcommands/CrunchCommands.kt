@@ -51,10 +51,11 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
         ChildPermission(name = "$PLUGIN_ID.ctp"),
         ChildPermission(name = "$PLUGIN_ID.warp.*")
     ]),
-    Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows creating, listing, and using warps.", defaultValue = PermissionDefault.OP, children = [
+    Permission(name = "$PLUGIN_ID.warp.*", desc = "Allows full control over all warps.", defaultValue = PermissionDefault.OP, children = [
         ChildPermission(name = "$PLUGIN_ID.warp.create"),
         ChildPermission(name = "$PLUGIN_ID.warp.list"),
-        ChildPermission(name = "$PLUGIN_ID.warp.use")
+        ChildPermission(name = "$PLUGIN_ID.warp.use"),
+        ChildPermission(name = "$PLUGIN_ID.warp.remove")
     ])
 ])
 class CrunchCommands : JavaPlugin() {

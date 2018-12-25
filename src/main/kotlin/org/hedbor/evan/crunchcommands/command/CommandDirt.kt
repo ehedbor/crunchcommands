@@ -42,23 +42,25 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 class CommandDirt(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
-        if (result !is CommandResult.Success) {
+        if (result is Failure) {
             return result
         }
         sender as Player
 
         if (args.isNotEmpty()) {
-            return CommandResult.IncorrectUsage()
+            return Failure.IncorrectUsage()
         }
 
         // 5% chance to send the player into the sky
         val sendToHeaven = Random.nextInt(0, 100) >= 95
-        if (sendToHeaven) {
+        return if (sendToHeaven) {
             val oldLocation = sender.location
             val blockLocation = Location(oldLocation.world, oldLocation.x, 255.0, oldLocation.z)
+
             sender.world.getBlockAt(blockLocation).type = Material.DIRT
             sender.teleport(blockLocation.add(0.0, 1.0, 0.0))
-            sender.sendMessage("${ChatColor.LIGHT_PURPLE}haha lol")
+
+            Success.SentToHeaven()
         } else {
             val dirt = itemStack(Material.DIRT) {
                 amount = 3
@@ -70,8 +72,7 @@ class CommandDirt(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly 
             }
 
             sender.inventory.addItem(dirt)
+            Success.DirtReceived()
         }
-
-        return CommandResult.Success
     }
 }

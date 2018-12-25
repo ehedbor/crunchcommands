@@ -21,18 +21,26 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
 
 
 /**
- * Responsible for managing the list of warps and their locations.
+ * Responsible for managing the list of [Warp]s.
  */
 class WarpManager(val plugin: CrunchCommands, warps: List<Warp> = emptyList()) {
+    /**
+     * The warp list, ordered alphabetically.
+     */
     var warps = warps
         private set
 
+    /**
+     * Returns the [Warp] with the given [name], or `null` if it doesn't exist.
+     */
     fun getWarp(name: String): Warp? {
         return warps.firstOrNull { it.name == name }
     }
 
     /**
-     * Adds a warp if one with the given name does not already exist.
+     * Adds a [Warp] if one with the same name does not already exist.
+     *
+     * @return `true` if the [Warp] was removed, `false` if the [Warp] never existed.
      */
     fun addWarp(warp: Warp): Boolean {
         return if (getWarp(warp.name) != null) {
@@ -42,5 +50,18 @@ class WarpManager(val plugin: CrunchCommands, warps: List<Warp> = emptyList()) {
             plugin.saveConfig()
             true
         }
+    }
+
+    /**
+     * Removes the [Warp] with the given [name].
+     *
+     * @return The removed [Warp], or `null` if it never existed.
+     */
+    fun removeWarp(name: String): Warp? {
+        val warp = getWarp(name)
+        if (warp != null) {
+            warps -= warp
+        }
+        return warp
     }
 }

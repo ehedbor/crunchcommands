@@ -25,19 +25,22 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 
 
 /**
- * Allows the creation, listation, and usation of warps.
+ * Allows full control over warps.
  *
  * @see CommandWarpCreate
  * @see CommandWarpList
  * @see CommandWarpUse
+ * @see CommandWarpRemove
  */
 @CommandYml(name = "warp", desc = "Warp base command", permission = "$PLUGIN_ID.warp", permissionMessage = PERM_MSG, usage = "/warp <create|list|use> [<...>]")
 class CommandWarp(plugin: CrunchCommands) : BaseCommand(
     plugin,
     mapOf(
         "create" to CommandWarpCreate(plugin),
-        "list" to CommandWarpList(plugin), 
-        "use" to CommandWarpUse(plugin))
+        "list" to CommandWarpList(plugin),
+        "use" to CommandWarpUse(plugin),
+        "remove" to CommandWarpRemove(plugin)
+    )
 ) {
     override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? = when {
         args.isEmpty() -> {

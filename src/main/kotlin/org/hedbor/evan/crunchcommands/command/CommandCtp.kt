@@ -37,31 +37,29 @@ import org.bukkit.plugin.java.annotation.command.Command as CommandYml
 class CommandCtp(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
-        if (result !is CommandResult.Success) {
+        if (result is Failure) {
             return result
         }
         sender as Player
 
         // Must have exactly one target
         if (args.size != 1) {
-            return CommandResult.IncorrectUsage()
+            return Failure.IncorrectUsage()
         }
 
         // Target must be a connected player
         val targetName = args[0]
         val targets = Bukkit.getOnlinePlayers().filter { it.name == targetName }
         if (targets.isEmpty()) {
-            return CommandResult.PlayerNotFound
+            return Failure.PlayerNotFound()
         } else if (targets.size > 1) {
-            return CommandResult.MultiplePlayersFound
+            return Failure.MultiplePlayersFound()
         }
         val target = targets[0]
 
         // Teleport the sender and notify both players.
         sender.teleport(target)
-        sender.sendMessage("${ChatColor.YELLOW}You teleported to ${target.displayName}.")
         target.sendMessage("${ChatColor.YELLOW}${sender.displayName} teleported to you.")
-
-        return CommandResult.Success
+        return Success.TeleportedToPlayer(target.displayName)
     }
 }
