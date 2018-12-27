@@ -35,8 +35,8 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
  */
 abstract class CrunchCommand(
     protected val plugin: CrunchCommands,
-    protected val permission: String? = null,
-    protected val isPlayersOnly: Boolean = false
+    private val permission: String? = null,
+    private val isPlayersOnly: Boolean = false
 ) : CommandExecutor, TabCompleter {
 
     companion object {
@@ -73,7 +73,7 @@ abstract class CrunchCommand(
     open fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         return if (isPlayersOnly && sender !is Player) {
             Failure.PlayersOnly()
-        } else if (!sender.hasPermission(permission)) {
+        } else if (permission != null && !sender.hasPermission(permission)) {
             Failure.NoPermission()
         } else {
             Success.Generic()
