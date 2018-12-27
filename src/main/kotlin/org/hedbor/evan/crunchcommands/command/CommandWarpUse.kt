@@ -43,8 +43,19 @@ class CommandWarpUse(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchComma
         val warp = plugin.warpManager.getWarp(warpName) ?: return Failure.WarpDoesNotExist(warpName)
 
         sender.teleport(warp.location)
-        sender.sendMessage("Whoosh!")
-
         return Success.WarpUsed()
+    }
+
+    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? {
+        return when {
+            args.size == 1 -> {
+                val warpName = args[0].toLowerCase()
+                plugin.warpManager.warps
+                    .map { it.name }
+                    .filter { it.startsWith(warpName) }
+                    .sorted()
+            }
+            else -> emptyList()
+        }
     }
 }

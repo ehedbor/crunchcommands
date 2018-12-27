@@ -19,6 +19,7 @@ package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
 
 /**
@@ -26,6 +27,7 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
  */
 abstract class BaseCommand(
     plugin: CrunchCommands,
+    private val baseCommandName: String,
     protected val subCommands: Map<String, SubCommand> = emptyMap()
 ) : CrunchCommand(plugin) {
 
@@ -43,5 +45,26 @@ abstract class BaseCommand(
         val subCommand = subCommands[subCommandName]
 
         return subCommand?.execute(sender, args.copyOfRange(1, args.size)) ?: Failure.IncorrectUsage()
+    }
+
+    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? {
+        return when {
+            args.size == 1 -> {
+                val subCommand = args[0].toLowerCase()
+                this.subCommands
+                    .map { it.key.toLowerCase() }
+                    .filter { sender.hasPermission("$PLUGIN_ID.$baseCommandName.$it") }
+                    .filter { it.startsWith(subCommand) }
+                    .sorted()
+            }
+            args.size > 1 -> {
+                val subCommand = subCommands[args[0]]
+                when (subCommand) {
+                    null -> emptyList()
+                    else -> subCommand.tabComplete(sender, args.copyOfRange(1, args.size))
+                }
+            }
+            else -> super.tabComplete(sender, args)
+        }
     }
 }

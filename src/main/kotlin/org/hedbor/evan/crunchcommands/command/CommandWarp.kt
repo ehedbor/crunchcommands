@@ -17,9 +17,7 @@
 
 package org.hedbor.evan.crunchcommands.command
 
-import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
 
 /**
@@ -32,36 +30,11 @@ import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
  */
 class CommandWarp(plugin: CrunchCommands) : BaseCommand(
     plugin,
-    mapOf(
+    baseCommandName = "warp",
+    subCommands = mapOf(
         "create" to CommandWarpCreate(plugin),
         "list" to CommandWarpList(plugin),
         "use" to CommandWarpUse(plugin),
         "remove" to CommandWarpRemove(plugin)
     )
-) {
-    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? = when {
-        args.isEmpty() -> {
-            subCommands
-                .map { it.key }
-                .filter { subCommand -> sender.hasPermission("$PLUGIN_ID.warp.$subCommand") }
-        }
-        else -> {
-            val subCommand = args[0]
-            when {
-                subCommand == "use" -> {
-                    val warpName = args.getOrElse(1) { "" }
-                    plugin.warpManager.warps
-                        .map { it.name }
-                        .filter { it.startsWith(warpName) }
-                }
-                args.size == 1 -> {
-                    subCommands
-                        .map { it.key }
-                        .filter { sender.hasPermission("$PLUGIN_ID.warp.$it") }
-                        .filter { it.startsWith(subCommand) }
-                }
-                else -> emptyList()
-            }
-        }
-    }
-}
+)

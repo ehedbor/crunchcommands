@@ -37,7 +37,7 @@ class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCo
         if (args.size != 1) {
             return Failure.IncorrectUsage("Usage: /warp create <name>")
         }
-        val warpName = args[0]
+        val warpName = args[0].toLowerCase()
 
         val warpManager = plugin.warpManager
         if (warpManager.getWarp(warpName) != null) {
