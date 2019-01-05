@@ -35,8 +35,8 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
  */
 abstract class CrunchCommand(
     internal val plugin: CrunchCommands,
-    private val permission: String? = null,
-    private val isPlayersOnly: Boolean = false
+    internal val permission: String? = null,
+    internal val isPlayersOnly: Boolean = false
 ) : CommandExecutor, TabCompleter {
 
     companion object {

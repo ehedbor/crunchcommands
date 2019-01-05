@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
 
 /**
@@ -27,7 +26,6 @@ import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
  */
 abstract class BaseCommand(
     plugin: CrunchCommands,
-    private val baseCommandName: String,
     protected val subCommands: Map<String, SubCommand> = emptyMap()
 ) : CrunchCommand(plugin) {
 
@@ -51,11 +49,13 @@ abstract class BaseCommand(
         return when {
             args.size == 1 -> {
                 val subCommand = args[0].toLowerCase()
-                this.subCommands
-                    .map { it.key.toLowerCase() }
-                    .filter { sender.hasPermission("$PLUGIN_ID.$baseCommandName.$it") }
-                    .filter { it.startsWith(subCommand) }
+                subCommands.asSequence()
+                    .map { (name, cmd) -> name.toLowerCase() to cmd }
+                    .filter { (_, cmd) -> sender.hasPermission(cmd.permission) }
+                    .filter { (name, _) -> name.startsWith(subCommand) }
+                    .map { (name, _) -> name }
                     .sorted()
+                    .toList()
             }
             args.size > 1 -> {
                 val subCommand = subCommands[args[0]]

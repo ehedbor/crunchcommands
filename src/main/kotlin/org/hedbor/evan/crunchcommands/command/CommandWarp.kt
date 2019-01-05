@@ -31,7 +31,6 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
  */
 class CommandWarp(plugin: CrunchCommands) : BaseCommand(
     plugin,
-    baseCommandName = "warp",
     subCommands = mapOf(
         "create" to CommandWarpCreate(plugin),
         "list" to CommandWarpList(plugin),
