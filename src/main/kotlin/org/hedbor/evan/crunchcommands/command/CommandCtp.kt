@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,5 +54,13 @@ class CommandCtp(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly =
         sender.teleport(target)
         target.sendMessage("${ChatColor.YELLOW}${sender.displayName} teleported to you.")
         return Success.TeleportedToPlayer(target.displayName)
+    }
+
+    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? {
+        // use default tab completion (players) for first arg.
+        return when (args.size) {
+            1 -> null
+            else -> emptyList()
+        }
     }
 }

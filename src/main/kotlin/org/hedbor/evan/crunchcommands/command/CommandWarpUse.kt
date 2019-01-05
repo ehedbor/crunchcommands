@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,16 +46,5 @@ class CommandWarpUse(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchComma
         return Success.WarpUsed()
     }
 
-    override fun tabComplete(sender: CommandSender, args: Array<String>): List<String>? {
-        return when {
-            args.size == 1 -> {
-                val warpName = args[0].toLowerCase()
-                plugin.warpManager.warps
-                    .map { it.name }
-                    .filter { it.startsWith(warpName) }
-                    .sorted()
-            }
-            else -> emptyList()
-        }
-    }
+    override fun tabComplete(sender: CommandSender, args: Array<String>) = tabCompleteWarp(sender, args)
 }

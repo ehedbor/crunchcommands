@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import org.hedbor.evan.crunchcommands.CrunchCommands
  * @param isPlayersOnly Set to `true` to enforce players-only.
  */
 abstract class CrunchCommand(
-    protected val plugin: CrunchCommands,
+    internal val plugin: CrunchCommands,
     private val permission: String? = null,
     private val isPlayersOnly: Boolean = false
 ) : CommandExecutor, TabCompleter {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,4 +45,6 @@ class CommandWarpRemove(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID
             Failure.WarpDoesNotExist(warpName)
         }
     }
+
+    override fun tabComplete(sender: CommandSender, args: Array<String>) = tabCompleteWarp(sender, args)
 }

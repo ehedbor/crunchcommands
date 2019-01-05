@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package org.hedbor.evan.crunchcommands.command
 
+import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
 
 
@@ -38,3 +39,21 @@ class CommandWarp(plugin: CrunchCommands) : BaseCommand(
         "remove" to CommandWarpRemove(plugin)
     )
 )
+
+
+/**
+ * Returns proper tab completion for warp names.
+ */
+@Suppress("UNUSED_PARAMETER")
+internal fun CrunchCommand.tabCompleteWarp(sender: CommandSender, args: Array<String>): List<String>? {
+    return when {
+        args.size == 1 -> {
+            val warpName = args[0].toLowerCase()
+            plugin.warpManager.warps
+                .map { it.name }
+                .filter { it.startsWith(warpName) }
+                .sorted()
+        }
+        else -> emptyList()
+    }
+}
