@@ -15,6 +15,14 @@ commands:
     description: Teleports to another player.
     permission: crunchcommands.ctp
     permission-message: §cYou do not have permission to use this command.
+  suicide:
+    usage: /suicide
+    aliases:
+      - commitdie
+      - seppuku
+    description: End your life.
+    permission: crunchcommands.suicide
+    permission-message: §cYou do not have permission to use this command.
   warp:
     usage: /warp <create|list|remove|use> [<...>]
     description: Warp base command
@@ -31,6 +39,9 @@ permissions:
     default: true
   crunchcommands.ctp:
     description: Allows ctp command
+    default: true
+  crunchcommands.suicide:
+    description: Allows suicide command
     default: true
   crunchcommands.warp:
     description: Allows base warp command
@@ -62,4 +73,5 @@ permissions:
     children:
       - crunchcommands.dirt
       - crunchcommands.ctp
+      - crunchcommands.suicide
       - crunchcommands.warp.*

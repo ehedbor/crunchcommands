@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ sealed class Success(message: String? = null) : CommandResult(message) {
     class Generic : Success("Command succeeded successfully.")
     class DirtReceived : Success("You have received: ${ChatColor.RED}EMERGENCY DIRT${CrunchCommand.SUCCESS_COLOR}!")
     class SentToHeaven : Success("${ChatColor.LIGHT_PURPLE}haha lol welcome to the sky")
+    class SuicidedCommitted : Success("Life ended successfully.")
     class TeleportedToPlayer(playerName: String) : Success("You teleported to $playerName.")
     class WarpCreated(warp: Warp) : Success("Successfully created warp \"${warp.name}\" at ${warp.location.toReadableString()}.")
     class WarpRemoved(warp: Warp) : Success("Successfully removed warp \"${warp.name}\" at ${warp.location.toReadableString()}.")

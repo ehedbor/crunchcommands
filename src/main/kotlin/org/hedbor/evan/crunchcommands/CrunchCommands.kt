@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,7 @@ package org.hedbor.evan.crunchcommands
 
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.plugin.java.JavaPlugin
-import org.hedbor.evan.crunchcommands.command.CommandCtp
-import org.hedbor.evan.crunchcommands.command.CommandDirt
-import org.hedbor.evan.crunchcommands.command.CommandWarp
-import org.hedbor.evan.crunchcommands.command.CommandWarpList
+import org.hedbor.evan.crunchcommands.command.*
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
 import org.hedbor.evan.crunchcommands.warp.Warp
@@ -44,6 +41,7 @@ class CrunchCommands : JavaPlugin() {
         registerCommands(
             "dirt" to CommandDirt(this),
             "ctp" to CommandCtp(this),
+            "suicide" to CommandSuicide(this),
             "warp" to CommandWarp(this),
             "warps" to CommandWarpList(this)
         )
