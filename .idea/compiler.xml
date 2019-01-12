@@ -3,6 +3,8 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="crunchcommands_mai" target="1.8" />
+      <module name="plugin_main" target="1.8" />
+      <module name="plugin_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

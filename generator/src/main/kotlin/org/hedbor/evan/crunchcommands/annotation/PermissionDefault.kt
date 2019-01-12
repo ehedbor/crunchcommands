@@ -15,15 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap' }
+package org.hedbor.evan.crunchcommands.annotation
 
-        mavenCentral()
 
-        maven { url 'https://plugins.gradle.org/m2/' }
-    }
+/**
+ * The default value of a permission.
+ */
+enum class PermissionDefault(private val ymlName: String) {
+    /** Always grant the player the permission. */
+    ALWAYS("true"),
+    /** Never grant the player the permission. */
+    NEVER("false"),
+    /** Grant the permission if the player is an operator. */
+    OP("op"),
+    /** Grant the permission if the player is *not* an operator. */
+    NOT_OP("not op");
+
+    override fun toString() = ymlName
 }
-rootProject.name = 'crunchcommands'
-include 'generator'
-

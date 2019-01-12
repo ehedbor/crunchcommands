@@ -15,15 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap' }
+package org.hedbor.evan.crunchcommands.annotation
 
-        mavenCentral()
-
-        maven { url 'https://plugins.gradle.org/m2/' }
-    }
-}
-rootProject.name = 'crunchcommands'
-include 'generator'
-
+/**
+ * Represents a permission and its information.
+ *
+ * @param name The permission's name.
+ * @param description A short description of what this permission allows.
+ * @param default Sets the default value of the permission.
+ * @param children Allows you to set children for the permission.
+ */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.SOURCE)
+annotation class Permission(
+    val name: String,
+    val description: String = "",
+    val default: PermissionDefault = PermissionDefault.OP,
+    val children: Array<ChildPermission> = []
+)

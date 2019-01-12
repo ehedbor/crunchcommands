@@ -19,6 +19,8 @@ package org.hedbor.evan.crunchcommands
 
 import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.plugin.java.JavaPlugin
+import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
+import org.hedbor.evan.crunchcommands.annotation.*
 import org.hedbor.evan.crunchcommands.command.*
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
@@ -29,6 +31,43 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
 /**
  * The main plugin class.
  */
+@Plugin(
+    name = "CrunchCommands",
+    version = "@VERSION@",
+    apiVersion = "1.13",
+    description = "A Spigot version of CrunchCommands!",
+    authors = ["Evan Hedbor"],
+    commands = [
+        Command("dirt", "Provides emergency dirt.", "/dirt", "$PLUGIN_ID.dirt"),
+        Command("ctp", "Teleports you to another player.", "/ctp <name>", "$PLUGIN_ID.ctp"),
+        Command("suicide", "Ends your life.", "/suicide", "$PLUGIN_ID.suicide"),
+        Command("warp", "Base warp command", "/warp <create|list|remove|use> [<...>]", "$PLUGIN_ID.warp"),
+        Command("warps", "Alias for /warp list", "/warps [<page>]", "$PLUGIN_ID.warp.list")
+    ],
+    permissions = [
+        Permission("$PLUGIN_ID.dirt", "Allows dirt command", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID.ctp", "Allows ctp command", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID.suicide", "Allows suicide command", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID.warp", "Allows warp base command", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID.warp.create", "Allows warp creation", PermissionDefault.OP),
+        Permission("$PLUGIN_ID.warp.remove", "Allows warp deletion", PermissionDefault.OP),
+        Permission("$PLUGIN_ID.warp.list", "Allows warp listing", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID,warp.use", "Allows warp use", PermissionDefault.ALWAYS),
+        Permission("$PLUGIN_ID.warp.*", "Allows full control over warps", PermissionDefault.NEVER, [
+            ChildPermission("$PLUGIN_ID.warp"),
+            ChildPermission("$PLUGIN_ID.warp.create"),
+            ChildPermission("$PLUGIN_ID.warp.remove"),
+            ChildPermission("$PLUGIN_ID.warp.list"),
+            ChildPermission("$PLUGIN_ID.warp.use")
+        ]),
+        Permission("$PLUGIN_ID.*", "Wildcard permission", PermissionDefault.NEVER, [
+            ChildPermission("$PLUGIN_ID.dirt"),
+            ChildPermission("$PLUGIN_ID.ctp"),
+            ChildPermission("$PLUGIN_ID.suicide"),
+            ChildPermission("$PLUGIN_ID.warp.*")
+        ])
+    ]
+)
 class CrunchCommands : JavaPlugin() {
     lateinit var warpManager: WarpManager
 

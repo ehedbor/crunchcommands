@@ -15,15 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-pluginManagement {
-    repositories {
-        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap' }
+package org.hedbor.evan.crunchcommands.annotation
 
-        mavenCentral()
 
-        maven { url 'https://plugins.gradle.org/m2/' }
-    }
+enum class LoadOrder(private val ymlName: String) {
+    POST_WORLD("POSTWORLD"),
+    STARTUP("STARTUP"),
+    /** Use the default load order */
+    NONE_SPECIFIED("");
+
+    override fun toString() = ymlName
 }
-rootProject.name = 'crunchcommands'
-include 'generator'
-

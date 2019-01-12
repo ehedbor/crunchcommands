@@ -20,7 +20,7 @@ commands:
     aliases:
       - commitdie
       - seppuku
-    description: End your life.
+    description: Ends your life.
     permission: crunchcommands.suicide
     permission-message: §cYou do not have permission to use this command.
   warp:
