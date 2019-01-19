@@ -23,9 +23,7 @@ import org.bukkit.configuration.file.YamlRepresenter
 import org.hedbor.evan.crunchcommands.annotation.*
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
-import java.io.File
 import java.io.IOException
-import java.nio.charset.StandardCharsets.UTF_8
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -33,6 +31,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
+import javax.tools.StandardLocation
 
 
 /**
@@ -158,12 +157,11 @@ class PluginGenerator: AbstractProcessor() {
         }
         val yaml = Yaml(YamlConstructor(), yamlRepresenter, yamlOptions)
 
-        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
-        val outputFile = File(kaptKotlinGeneratedDir, "resources/plugin.yml")
-        // make sure the file exists
-        outputFile.createNewFile()
-
-        yaml.dump(pluginYml, outputFile.bufferedWriter(charset = UTF_8))
+        val file = processingEnv.filer.createResource(StandardLocation.CLASS_OUTPUT, "", "plugin.yml")
+        file.openWriter().use { writer ->
+            yaml.dump(pluginYml, writer)
+            writer.flush()
+        }
     }
 
     private fun <T> MutableMap<String, Any>.putIf(key: String, value: T, predicate: (T) -> Boolean) {
@@ -196,27 +194,4 @@ class PluginGenerator: AbstractProcessor() {
             else -> processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, msg, element)
         }
     }
-
-//    override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
-//        for (element in roundEnv.getElementsAnnotatedWith(Plugin::class.java)) {
-//            val className = element.simpleName.toString()
-//            val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
-//            generateClass(className, packageName)
-//        }
-//        return true
-//    }
-//
-//    private fun generateClass(className: String, packageName: String) {
-//        val fileName = "Generated_$className"
-//        val file = FileSpec.builder(packageName, fileName)
-//            .addType(TypeSpec.classBuilder(fileName)
-//                .addFunction(FunSpec.builder("getName")
-//                    .addStatement("return \"World\"")
-//                    .build())
-//                .build())
-//            .build()
-//
-//        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
-//        file.writeTo(File(kaptKotlinGeneratedDir, "$fileName.kt"))
-//    }
 }
