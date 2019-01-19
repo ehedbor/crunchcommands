@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,14 @@
 package org.hedbor.evan.crunchcommands.generator
 
 import com.google.auto.service.AutoService
+import org.bukkit.configuration.file.YamlConstructor
+import org.bukkit.configuration.file.YamlRepresenter
 import org.hedbor.evan.crunchcommands.annotation.*
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
+import java.io.File
+import java.io.IOException
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -31,11 +38,11 @@ import javax.tools.Diagnostic
 /**
  * Generates a plugin.yml file.
  */
+@Suppress("unused")
 @AutoService(Processor::class)
-class PluginGenerator : AbstractProcessor() {
+class PluginGenerator: AbstractProcessor() {
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
-        private const val INDENT = "  "
     }
 
     private var foundPluginClass: Boolean = false
@@ -68,148 +75,120 @@ class PluginGenerator : AbstractProcessor() {
         val pluginClassName = pluginElement.qualifiedName.toString()
         val pluginAnnotation = pluginElement.getAnnotation(Plugin::class.java)!!
 
-        val yml = createYmlInfo(pluginClassName, pluginAnnotation)
-        val ymlInfo = buildYmlFile(yml) ?: return false
-
-        // TODO: save ymlInfo to a file
+        val ymlMap = createYmlMap(pluginClassName, pluginAnnotation)
+        generateYmlFile(ymlMap)
 
         return true
     }
 
-    internal fun buildYmlFile(yml: Map<String, Any>): String? {
-        var content = ""
-
-        fun addMap(element: Map<*, *>, curIndent: String): Boolean {
-            for ((key, value) in element) {
-                when (value) {
-                    is Map<*, *> -> { // should be LinkedHashMap<String, Any>
-                        content += "$curIndent$key:\n"
-                        val success = addMap(value, "$curIndent$INDENT")
-                        if (!success) { return false }
-                    }
-                    is Array<*> -> { // should be Array<String>
-                        content += "$curIndent$key:\n"
-                        for (e in value) {
-                            content += "$curIndent$INDENT- $e\n"
-                        }
-                    }
-                    is String -> {
-                        content += "$curIndent$key: $value\n"
-                    }
-                    else -> {
-                        err("Couldn't build plugin.yml: unexpected type \"${value?.javaClass?.name}\".")
-                        return false
-                    }
-                }
-            }
-            return true
-        }
-
-        val success = addMap(yml, "")
-        return when (success) {
-            true -> content
-            false -> null
-        }
-
-    }
-
-    internal fun createYmlInfo(mainClass: String, pluginAnnotation: Plugin): LinkedHashMap<String, Any> {
+    private fun createYmlMap(mainClass: String, plugin: Plugin): LinkedHashMap<String, Any> {
         // can store a string, another LinkedHashMap, or an array.
         // use a linked hash map to preserve the order
         val yml = LinkedHashMap<String, Any>()
 
-        pluginAnnotation.apply {
+        yml.apply {
             // add required attributes
-            yml["main"] = mainClass
-            yml["name"] = name
-            yml["version"] = version
-            yml["api-version"] = apiVersion
+            this["main"] = mainClass
+            this["name"] = plugin.name
+            this["version"] = plugin.version
+            this["api-version"] = plugin.apiVersion
 
-            yml.putIfNotBlank("description", description)
-            yml.putIf("load", loadOrder) { it != LoadOrder.NONE_SPECIFIED }
+            putIfNotEmpty("description", plugin.description)
+            putIf("load", plugin.loadOrder) { it != LoadOrder.NONE_SPECIFIED }
 
             // add "author" element if only author is present, or "authors" if multiple are present
-            yml.putIf("author", authors.getOrNull(0)) { authors.size == 1 }
-            yml.putContentIf("authors", authors) { it.size > 1 }
+            putIf("author", plugin.authors.getOrNull(0)) { plugin.authors.size == 1 }
+            putIf("authors", plugin.authors) { it.size > 1 }
 
-            yml.putIfNotBlank("website", website)
-            yml.putIfNotBlank("prefix", prefix)
+            putIfNotEmpty("website", plugin.website)
+            putIfNotEmpty("prefix", plugin.prefix)
 
-            yml.putContentIfNotEmpty("depend", dependencies)
-            yml.putContentIfNotEmpty("softdepend", softDependencies)
-            yml.putContentIfNotEmpty("loadbefore", loadBefore)
-        }
+            putIfNotEmpty("depend", plugin.dependencies)
+            putIfNotEmpty("softdepend", plugin.softDependencies)
+            putIfNotEmpty("loadbefore", plugin.loadBefore)
 
-        // add the "commands" and "permissions" elements
-        val commands = LinkedHashMap<String, Any>()
-        for (cmd in pluginAnnotation.commands) {
-            val cmdInfo = LinkedHashMap<String, Any>()
-            cmdInfo.putIfNotBlank("usage", cmd.usage)
-            cmdInfo.putIfNotEmpty("aliases", cmd.aliases)
-            cmdInfo.putIfNotBlank("description", cmd.description)
-            cmdInfo.putIfNotBlank("permission", cmd.permission)
-            cmdInfo.putIfNotBlank("permission-message", cmd.permissionMessage)
+            // add the "commands" and "permissions" elements
+            val commands = LinkedHashMap<String, LinkedHashMap<String, Any>>()
+            for (cmd in plugin.commands) {
+                val cmdInfo = LinkedHashMap<String, Any>().apply {
+                    putIfNotEmpty("usage", cmd.usage)
+                    putIfNotEmpty("aliases", cmd.aliases)
+                    putIfNotEmpty("description", cmd.description)
+                    putIfNotEmpty("permission", cmd.permission)
+                    putIfNotEmpty("permission-message", cmd.permissionMessage)
+                }
 
-            commands[cmd.name] = cmdInfo
-        }
-        yml.putIfNotEmpty("commands", commands)
-
-        val permissions = LinkedHashMap<String, Any>()
-        for (perm in pluginAnnotation.permissions) {
-            val permInfo = LinkedHashMap<String, Any>()
-            permInfo.putIfNotBlank("description", perm.description)
-            permInfo["default"] = perm.default.toString()
-
-            val children = LinkedHashMap<String, Any>()
-            for (child in perm.children) {
-                children[child.name] = child.inherit.toString()
+                commands[cmd.name] = cmdInfo
             }
-            permInfo.putIfNotEmpty("children", children)
+            putIfNotEmpty("commands", commands)
 
-            permissions[perm.name] = permInfo
+
+            val permissions = LinkedHashMap<String, LinkedHashMap<String, Any>>()
+            for (perm in plugin.permissions) {
+                val permInfo = LinkedHashMap<String, Any>().apply {
+                    putIfNotEmpty("description", perm.description)
+                    this["default"] = perm.default.toString()
+
+                    val children = LinkedHashMap<String, Boolean>()
+                    for (child in perm.children) {
+                        children[child.name] = child.inherit
+                    }
+                    putIfNotEmpty("children", children)
+                }
+
+                permissions[perm.name] = permInfo
+            }
+            yml.putIfNotEmpty("permissions", permissions)
+
         }
-        yml.putIfNotEmpty("permissions", permissions)
 
         return yml
     }
 
+    @Throws(IOException::class)
+    private fun generateYmlFile(pluginYml: Map<String, Any>) {
+        val yamlOptions = DumperOptions().apply {
+            indent = 2
+            defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+            defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
+        }
+        val yamlRepresenter = YamlRepresenter().apply {
+            defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+            defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
+        }
+        val yaml = Yaml(YamlConstructor(), yamlRepresenter, yamlOptions)
+
+        val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
+        val outputFile = File(kaptKotlinGeneratedDir, "resources/plugin.yml")
+        // make sure the file exists
+        outputFile.createNewFile()
+
+        yaml.dump(pluginYml, outputFile.bufferedWriter(charset = UTF_8))
+    }
 
     private fun <T> MutableMap<String, Any>.putIf(key: String, value: T, predicate: (T) -> Boolean) {
         if (predicate(value)) {
-            this[key] = value.toString()
+            this[key] = value ?: "null"
         }
     }
 
-    private fun MutableMap<String, Any>.putIfNotBlank(key: String, value: String) {
+    private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String) {
         if (value.isNotBlank()) {
             this[key] = value
         }
     }
 
-    private fun <T> MutableMap<String, Any>.putContentIf(key: String, value: Array<T>, predicate: (Array<T>) -> Boolean) {
-        if (value.isNotEmpty()) {
-            this[key] = value.contentToString()
+    private fun MutableMap<String, Any>.putIfNotEmpty(key: String, values: Array<String>) {
+        if (values.isNotEmpty()) {
+            this[key] = values
         }
     }
 
-    private fun <T> MutableMap<String, Any>.putContentIfNotEmpty(key: String, value: Array<T>) {
-        if (value.isNotEmpty()) {
-            this[key] = value.contentToString()
+    private fun MutableMap<String, Any>.putIfNotEmpty(key: String, values: Map<String, Any>) {
+        if (values.isNotEmpty()) {
+            this[key] = values
         }
     }
-
-    private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: Array<String>) {
-        if (value.isNotEmpty()) {
-            this[key] = value
-        }
-    }
-
-    private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: Map<String, Any>) {
-        if (value.isNotEmpty()) {
-            this[key] = value
-        }
-    }
-
 
     private fun err(msg: String, element: Element? = null) {
         when (element) {
