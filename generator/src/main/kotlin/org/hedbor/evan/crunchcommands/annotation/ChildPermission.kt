@@ -26,7 +26,6 @@ package org.hedbor.evan.crunchcommands.annotation
  *     the inverse parent permission.
  */
 @Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
 annotation class ChildPermission(
     val name: String,
     val inherit: Boolean = true

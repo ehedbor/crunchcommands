@@ -50,7 +50,7 @@ class PluginGenerator : AbstractProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         val elements = roundEnv.getElementsAnnotatedWith(Plugin::class.java)
-        if (elements.size > 1 || foundPluginClass) {
+        if (elements.size > 1 && foundPluginClass) {
             err("Found more than one plugin class")
             return false
         } else if (elements.isEmpty()) {
@@ -65,14 +65,18 @@ class PluginGenerator : AbstractProcessor() {
             return false
         }
 
+        val pluginClassName = pluginElement.qualifiedName.toString()
         val pluginAnnotation = pluginElement.getAnnotation(Plugin::class.java)!!
-        val yml = createYmlInfo(pluginAnnotation, pluginElement)
+
+        val yml = createYmlInfo(pluginClassName, pluginAnnotation)
         val ymlInfo = buildYmlFile(yml) ?: return false
+
+        // TODO: save ymlInfo to a file
 
         return true
     }
 
-    private fun buildYmlFile(yml: Map<String, Any>): String? {
+    internal fun buildYmlFile(yml: Map<String, Any>): String? {
         var content = ""
 
         fun addMap(element: Map<*, *>, curIndent: String): Boolean {
@@ -80,20 +84,20 @@ class PluginGenerator : AbstractProcessor() {
                 when (value) {
                     is Map<*, *> -> { // should be LinkedHashMap<String, Any>
                         content += "$curIndent$key:\n"
-                        val success = addMap(element, "$curIndent$INDENT")
+                        val success = addMap(value, "$curIndent$INDENT")
                         if (!success) { return false }
                     }
                     is Array<*> -> { // should be Array<String>
                         content += "$curIndent$key:\n"
                         for (e in value) {
-                            content += "$curIndent$INDENT - $e\n"
+                            content += "$curIndent$INDENT- $e\n"
                         }
                     }
                     is String -> {
                         content += "$curIndent$key: $value\n"
                     }
                     else -> {
-                        err("Couldn't build plugin.yml: unexpected type found.")
+                        err("Couldn't build plugin.yml: unexpected type \"${value?.javaClass?.name}\".")
                         return false
                     }
                 }
@@ -109,14 +113,14 @@ class PluginGenerator : AbstractProcessor() {
 
     }
 
-    private fun createYmlInfo(pluginAnnotation: Plugin, pluginElement: TypeElement): LinkedHashMap<String, Any> {
+    internal fun createYmlInfo(mainClass: String, pluginAnnotation: Plugin): LinkedHashMap<String, Any> {
         // can store a string, another LinkedHashMap, or an array.
         // use a linked hash map to preserve the order
         val yml = LinkedHashMap<String, Any>()
 
         pluginAnnotation.apply {
             // add required attributes
-            yml["main"] = pluginElement.qualifiedName.toString()
+            yml["main"] = mainClass
             yml["name"] = name
             yml["version"] = version
             yml["api-version"] = apiVersion
@@ -161,6 +165,8 @@ class PluginGenerator : AbstractProcessor() {
                 children[child.name] = child.inherit.toString()
             }
             permInfo.putIfNotEmpty("children", children)
+
+            permissions[perm.name] = permInfo
         }
         yml.putIfNotEmpty("permissions", permissions)
 

@@ -30,7 +30,6 @@ package org.hedbor.evan.crunchcommands.annotation
  * @param aliases Alternate command names a user may use instead.
  */
 @Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
 annotation class Command(
     val name: String,
     val description: String = "",

@@ -26,7 +26,6 @@ package org.hedbor.evan.crunchcommands.annotation
  * @param children Allows you to set children for the permission.
  */
 @Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
 annotation class Permission(
     val name: String,
     val description: String = "",

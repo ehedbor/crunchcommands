@@ -17,11 +17,11 @@
 
 package org.hedbor.evan.crunchcommands
 
-import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.plugin.java.JavaPlugin
 import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.annotation.*
 import org.hedbor.evan.crunchcommands.command.*
+import org.hedbor.evan.crunchcommands.util.ConfigurationSerialization
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
 import org.hedbor.evan.crunchcommands.warp.Warp
@@ -93,7 +93,7 @@ class CrunchCommands : JavaPlugin() {
     }
 
     private fun setupConfig() {
-        ConfigurationSerialization.registerClass(Warp::class.java, "org.hedbor.evan.crunchcommands.warp.Warp")
+        ConfigurationSerialization.registerClass<Warp>()
         config.addDefault("warps", emptyList<Warp>())
 
         val warps = config.getObjectList<Warp>("warps")

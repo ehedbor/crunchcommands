@@ -42,7 +42,6 @@ package org.hedbor.evan.crunchcommands.annotation
  * @param permissions Permissions that the plugin wishes to register.
  */
 @Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.SOURCE)
 annotation class Plugin(
     val name: String,
     val version: String,

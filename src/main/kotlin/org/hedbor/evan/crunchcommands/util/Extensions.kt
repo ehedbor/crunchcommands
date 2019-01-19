@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.PluginCommand
 import org.bukkit.configuration.Configuration
+import org.bukkit.configuration.serialization.ConfigurationSerializable
+import org.bukkit.configuration.serialization.ConfigurationSerialization
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.plugin.java.JavaPlugin
@@ -55,6 +57,16 @@ internal fun ItemStack.itemMeta(block: ItemMeta.() -> Unit): ItemMeta {
     return itemMeta
 }
 
+
+internal object ConfigurationSerialization {
+    internal fun <T : ConfigurationSerializable> registerClass(clazz: KClass<T>) {
+        ConfigurationSerialization.registerClass(clazz.java, clazz.java.canonicalName)
+    }
+
+    internal inline fun <reified T : ConfigurationSerializable> registerClass() {
+        registerClass(T::class)
+    }
+}
 
 internal fun <T : Any> Configuration.getObjectList(entryClass: KClass<T>, path: String, def: List<T> = emptyList()): List<T> {
     val result = ArrayList<T>()
