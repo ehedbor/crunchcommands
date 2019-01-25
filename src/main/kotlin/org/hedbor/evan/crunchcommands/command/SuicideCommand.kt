@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,33 +18,19 @@
 package org.hedbor.evan.crunchcommands.command
 
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.hedbor.evan.crunchcommands.CrunchCommands
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 
 
-/**
- * Allows warps to be removed.
- */
-class CommandWarpRemove(plugin: CrunchCommands) : SubCommand(plugin, "$PLUGIN_ID.warp.remove") {
+class SuicideCommand(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
         if (result is Failure) {
             return result
         }
+        sender as Player
 
-        if (args.size != 1) {
-            return Failure.IncorrectUsage("Usage: /warp remove <name>")
-        }
-
-        val warpName = args[0]
-        val warp = plugin.warpManager.removeWarp(warpName)
-
-        return if (warp != null) {
-            Success.WarpRemoved(warp)
-        } else {
-            Failure.WarpDoesNotExist(warpName)
-        }
+        sender.health = 0.0
+        return Success.SuicideCommitted()
     }
-
-    override fun tabComplete(sender: CommandSender, args: Array<String>) = tabCompleteWarp(sender, args)
 }

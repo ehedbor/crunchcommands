@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@ package org.hedbor.evan.crunchcommands.warp
 
 import org.bukkit.Location
 import org.bukkit.configuration.serialization.ConfigurationSerializable
-import java.util.*
+import org.bukkit.entity.Player
+import java.util.UUID
 
 
 /**
@@ -39,7 +40,7 @@ data class Warp(val name: String, val location: Location, val creator: UUID) : C
         @JvmStatic
         fun deserialize(values: Map<String, Any>): Warp {
             val name = values["name"] as? String
-            val location = values["location"] as? Map<*, *>
+            val location = values["location"] as? MutableMap<*, *>
             val creator = values["creator"] as? String
 
             requireNotNull(name) { "Name not present" }
@@ -53,5 +54,7 @@ data class Warp(val name: String, val location: Location, val creator: UUID) : C
                 creator = UUID.fromString(creator)
             )
         }
+
+        fun getHomeNameFor(player: Player) = "home$${player.uniqueId}"
     }
 }

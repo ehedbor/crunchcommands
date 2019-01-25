@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,15 +33,16 @@ sealed class CommandResult(val message: String? = null)
 /**
  * Indicates that a [CrunchCommand] succeeded.
  */
-sealed class Success(message: String? = null) : CommandResult(message) {
+sealed class Success(message: String?) : CommandResult(message) {
     class Generic : Success("Command succeeded successfully.")
     class DirtReceived : Success("You have received: ${ChatColor.RED}EMERGENCY DIRT${CrunchCommand.SUCCESS_COLOR}!")
+    class HomeSet(home: Warp) : Success("Successfully set home at ${home.location.toReadableString()}")
     class SentToHeaven : Success("${ChatColor.LIGHT_PURPLE}haha lol welcome to the sky")
-    class SuicidedCommitted : Success("Life ended successfully.")
+    class SuicideCommitted : Success("Life ended successfully.")
     class TeleportedToPlayer(playerName: String) : Success("You teleported to $playerName.")
     class WarpCreated(warp: Warp) : Success("Successfully created warp \"${warp.name}\" at ${warp.location.toReadableString()}.")
     class WarpRemoved(warp: Warp) : Success("Successfully removed warp \"${warp.name}\" at ${warp.location.toReadableString()}.")
-    class WarpsListed : Success()
+    class WarpsListed : Success(null)
     class WarpUsed : Success("Whoosh!")
 }
 
@@ -49,8 +50,10 @@ sealed class Success(message: String? = null) : CommandResult(message) {
 /**
  * Indicates that a [CrunchCommand] failed.
  */
-sealed class Failure(message: String? = null) : CommandResult(message) {
+sealed class Failure(message: String?) : CommandResult(message) {
     class Generic : Failure("Command failed successfully.")
+    class BadWarpName(warpName: String) : Failure("Could not create warp: the name \"$warpName\" is invalid.")
+    class HomeNotSet : Failure("You have not set a home.")
     class IncorrectUsage(usage: String? = null) : Failure(usage)
     class MultiplePlayersFound : Failure("Multiple players found with that name.")
     class NoPermission : Failure("You do not have permission to use this command.")

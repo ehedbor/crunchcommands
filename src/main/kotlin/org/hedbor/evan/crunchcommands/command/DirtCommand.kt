@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import kotlin.random.Random
 /**
  * Gives the user some emergency dirt.
  */
-class CommandDirt(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
+class DirtCommand(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
         if (result is Failure) {

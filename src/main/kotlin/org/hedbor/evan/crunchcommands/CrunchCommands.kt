@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,12 @@
 package org.hedbor.evan.crunchcommands
 
 import org.bukkit.plugin.java.JavaPlugin
-import org.hedbor.evan.crunchcommands.CrunchCommands.Companion.PLUGIN_ID
 import org.hedbor.evan.crunchcommands.annotation.*
-import org.hedbor.evan.crunchcommands.command.*
+import org.hedbor.evan.crunchcommands.command.CtpCommand
+import org.hedbor.evan.crunchcommands.command.DirtCommand
+import org.hedbor.evan.crunchcommands.command.SuicideCommand
+import org.hedbor.evan.crunchcommands.command.warp.ListWarpCommand
+import org.hedbor.evan.crunchcommands.command.warp.WarpCommand
 import org.hedbor.evan.crunchcommands.util.ConfigurationSerialization
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
@@ -37,52 +40,60 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
     apiVersion = "1.13",
     description = "A Spigot version of CrunchCommands!",
     authors = ["Evan Hedbor"],
+    permissionPrefix = "crunchcommands",
     commands = [
-        Command("dirt", "Provides emergency dirt.", "/dirt", "$PLUGIN_ID.dirt"),
-        Command("ctp", "Teleports you to another player.", "/ctp <name>", "$PLUGIN_ID.ctp"),
-        Command("suicide", "Ends your life.", "/suicide", "$PLUGIN_ID.suicide"),
-        Command("warp", "Base warp command", "/warp <create|list|remove|use> [<...>]", "$PLUGIN_ID.warp"),
-        Command("warps", "Alias for /warp list", "/warps [<page>]", "$PLUGIN_ID.warp.list")
+        Command("dirt", "Provides emergency dirt.", "/dirt", "$.dirt"),
+        Command("ctp", "Teleports you to another player.", "/ctp <name>", "$.ctp"),
+        Command("home", "Teleports you home.", "/home", "$.home.use"),
+        Command("sethome", "Sets your home.", "/sethome", "$.home.set"),
+        Command("suicide", "Ends your life.", "/<command>", "$.suicide", aliases = ["seppuku", "stuck"]),
+        Command("warp", "Base warp command", "/warp <create|list|remove|use> [<...>]", "$.warp"),
+        Command("warps", "Alias for /warp list", "/warps [<page>]", "$.warp.list")
     ],
     permissions = [
-        Permission("$PLUGIN_ID.dirt", "Allows dirt command", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID.ctp", "Allows ctp command", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID.suicide", "Allows suicide command", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID.warp", "Allows warp base command", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID.warp.create", "Allows warp creation", PermissionDefault.OP),
-        Permission("$PLUGIN_ID.warp.remove", "Allows warp deletion", PermissionDefault.OP),
-        Permission("$PLUGIN_ID.warp.list", "Allows warp listing", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID,warp.use", "Allows warp use", PermissionDefault.ALWAYS),
-        Permission("$PLUGIN_ID.warp.*", "Allows full control over warps", PermissionDefault.NEVER, [
-            ChildPermission("$PLUGIN_ID.warp"),
-            ChildPermission("$PLUGIN_ID.warp.create"),
-            ChildPermission("$PLUGIN_ID.warp.remove"),
-            ChildPermission("$PLUGIN_ID.warp.list"),
-            ChildPermission("$PLUGIN_ID.warp.use")
+        Permission("$.dirt", "Allows dirt command", PermissionDefault.ALWAYS),
+        Permission("$.ctp", "Allows ctp command", PermissionDefault.ALWAYS),
+        Permission("$.home.set", "Allows sethome command", PermissionDefault.ALWAYS),
+        Permission("$.home.use", "Allows home command", PermissionDefault.ALWAYS),
+        Permission("$.home.*", "Allows full control over homes", PermissionDefault.NEVER, [
+            ChildPermission("$.home.set"),
+            ChildPermission("$.home.use")
         ]),
-        Permission("$PLUGIN_ID.*", "Wildcard permission", PermissionDefault.NEVER, [
-            ChildPermission("$PLUGIN_ID.dirt"),
-            ChildPermission("$PLUGIN_ID.ctp"),
-            ChildPermission("$PLUGIN_ID.suicide"),
-            ChildPermission("$PLUGIN_ID.warp.*")
+        Permission("$.suicide", "Allows suicide command", PermissionDefault.ALWAYS),
+        Permission("$.warp", "Allows warp base command", PermissionDefault.ALWAYS),
+        Permission("$.warp.create", "Allows warp creation", PermissionDefault.OP),
+        Permission("$.warp.remove", "Allows warp deletion", PermissionDefault.OP),
+        Permission("$.warp.list", "Allows warp listing", PermissionDefault.ALWAYS),
+        Permission("$,warp.use", "Allows warp use", PermissionDefault.ALWAYS),
+        Permission("$.warp.*", "Allows full control over warps", PermissionDefault.NEVER, [
+            ChildPermission("$.warp"),
+            ChildPermission("$.warp.create"),
+            ChildPermission("$.warp.remove"),
+            ChildPermission("$.warp.list"),
+            ChildPermission("$.warp.use")
+        ]),
+        Permission("$.*", "Wildcard permission", PermissionDefault.NEVER, [
+            ChildPermission("$.dirt"),
+            ChildPermission("$.ctp"),
+            ChildPermission("$.suicide"),
+            ChildPermission("$.warp.*")
         ])
     ]
 )
 class CrunchCommands : JavaPlugin() {
-    lateinit var warpManager: WarpManager
-
     companion object {
         internal const val PLUGIN_ID = "crunchcommands"
-        internal const val PERM_MSG = "§cYou do not have permission to use this command."
     }
+
+    lateinit var warpManager: WarpManager
 
     override fun onEnable() {
         registerCommands(
-            "dirt" to CommandDirt(this),
-            "ctp" to CommandCtp(this),
-            "suicide" to CommandSuicide(this),
-            "warp" to CommandWarp(this),
-            "warps" to CommandWarpList(this)
+            "dirt" to DirtCommand(this),
+            "ctp" to CtpCommand(this),
+            "suicide" to SuicideCommand(this),
+            "warp" to WarpCommand(this),
+            "warps" to ListWarpCommand(this)
         )
 
         setupConfig()

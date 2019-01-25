@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.hedbor.evan.crunchcommands.command
+package org.hedbor.evan.crunchcommands.command.warp
 
 import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
+import org.hedbor.evan.crunchcommands.command.CommandResult
+import org.hedbor.evan.crunchcommands.command.Failure
+import org.hedbor.evan.crunchcommands.command.SubCommand
+import org.hedbor.evan.crunchcommands.command.Success
 import org.hedbor.evan.crunchcommands.util.Paginator
 
 
 /**
  * Sub-command to list all warps. Also aliased as the base command `/warps`.
  *
- * @see CommandWarp
+ * @see WarpCommand
  */
-class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.list") {
+class ListWarpCommand(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.list") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
         if (result is Failure) return result
@@ -38,7 +42,9 @@ class CommandWarpList(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchComm
             // defaults to page 1
             0 -> 1
             // use the provided page number if explicitly mentioned
-            1 -> args[0].toIntOrNull() ?: return Failure.IncorrectUsage(usageMessage)
+            1 -> args[0].toIntOrNull() ?: return Failure.IncorrectUsage(
+                usageMessage
+            )
             else -> return Failure.IncorrectUsage(usageMessage)
         }
 

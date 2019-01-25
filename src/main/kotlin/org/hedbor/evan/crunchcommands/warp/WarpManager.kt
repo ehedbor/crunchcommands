@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package org.hedbor.evan.crunchcommands.warp
 
+import org.bukkit.entity.Player
 import org.hedbor.evan.crunchcommands.CrunchCommands
 
 
@@ -35,6 +36,13 @@ class WarpManager(val plugin: CrunchCommands, warps: List<Warp> = emptyList()) {
      */
     fun getWarp(name: String): Warp? {
         return warps.firstOrNull { it.name == name }
+    }
+
+    /**
+     * Returns the home for the given [player], or `null` if it doesn't exist.
+     */
+    fun getHome(player: Player): Warp? {
+        return getWarp(Warp.getHomeNameFor(player))
     }
 
     /**
@@ -63,5 +71,13 @@ class WarpManager(val plugin: CrunchCommands, warps: List<Warp> = emptyList()) {
             warps -= warp
         }
         return warp
+    }
+
+    /**
+     * Forcibly adds a [Warp], removing existing warps.
+     */
+    fun setWarp(warp: Warp) {
+        removeWarp(warp.name)
+        addWarp(warp)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,39 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.hedbor.evan.crunchcommands.command
+package org.hedbor.evan.crunchcommands.command.warp
 
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.hedbor.evan.crunchcommands.CrunchCommands
+import org.hedbor.evan.crunchcommands.command.CommandResult
+import org.hedbor.evan.crunchcommands.command.Failure
+import org.hedbor.evan.crunchcommands.command.SubCommand
+import org.hedbor.evan.crunchcommands.command.Success
 
 
-class CommandSuicide(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly = true) {
+/**
+ * Allows warps to be removed.
+ */
+class RemoveWarpCommand(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.remove") {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
         if (result is Failure) {
             return result
         }
-        sender as Player
 
-        sender.health = 0.0
-        return Success.SuicidedCommitted()
+        if (args.size != 1) {
+            return Failure.IncorrectUsage("Usage: /warp remove <name>")
+        }
+
+        val warpName = args[0]
+        val warp = plugin.warpManager.removeWarp(warpName)
+
+        return if (warp != null) {
+            Success.WarpRemoved(warp)
+        } else {
+            Failure.WarpDoesNotExist(warpName)
+        }
     }
+
+    override fun tabComplete(sender: CommandSender, args: Array<String>) = tabCompleteWarp(sender, args)
 }

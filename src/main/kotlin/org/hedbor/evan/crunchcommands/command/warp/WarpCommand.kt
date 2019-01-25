@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.hedbor.evan.crunchcommands.command
+package org.hedbor.evan.crunchcommands.command.warp
 
 import org.bukkit.command.CommandSender
 import org.hedbor.evan.crunchcommands.CrunchCommands
+import org.hedbor.evan.crunchcommands.command.BaseCommand
+import org.hedbor.evan.crunchcommands.command.CrunchCommand
 
 
 /**
  * Allows full control over warps.
  *
- * @see CommandWarpCreate
- * @see CommandWarpList
- * @see CommandWarpUse
- * @see CommandWarpRemove
+ * @see CreateWarpCommand
+ * @see ListWarpCommand
+ * @see UseWarpCommand
+ * @see RemoveWarpCommand
  */
-class CommandWarp(plugin: CrunchCommands) : BaseCommand(
+class WarpCommand(plugin: CrunchCommands) : BaseCommand(
     plugin,
     subCommands = mapOf(
-        "create" to CommandWarpCreate(plugin),
-        "list" to CommandWarpList(plugin),
-        "use" to CommandWarpUse(plugin),
-        "remove" to CommandWarpRemove(plugin)
+        "create" to CreateWarpCommand(plugin),
+        "list" to ListWarpCommand(plugin),
+        "use" to UseWarpCommand(plugin),
+        "remove" to RemoveWarpCommand(plugin)
     )
 )
 

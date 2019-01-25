@@ -100,11 +100,14 @@ class PluginGenerator: AbstractProcessor() {
             putIf("authors", plugin.authors) { it.size > 1 }
 
             putIfNotEmpty("website", plugin.website)
-            putIfNotEmpty("prefix", plugin.prefix)
+            putIfNotEmpty("prefix", plugin.chatPrefix)
 
             putIfNotEmpty("depend", plugin.dependencies)
             putIfNotEmpty("softdepend", plugin.softDependencies)
             putIfNotEmpty("loadbefore", plugin.loadBefore)
+
+            // check if the permission prefix exists
+            val permPrefix = if (plugin.permissionPrefix.isNotBlank()) plugin.permissionPrefix else null
 
             // add the "commands" and "permissions" elements
             val commands = LinkedHashMap<String, LinkedHashMap<String, Any>>()
@@ -113,7 +116,11 @@ class PluginGenerator: AbstractProcessor() {
                     putIfNotEmpty("usage", cmd.usage)
                     putIfNotEmpty("aliases", cmd.aliases)
                     putIfNotEmpty("description", cmd.description)
-                    putIfNotEmpty("permission", cmd.permission)
+                    if (permPrefix == null) {
+                        putIfNotEmpty("permission", cmd.permission)
+                    } else {
+                        putIfNotEmpty("permission", cmd.permission.replace("$", permPrefix))
+                    }
                     putIfNotEmpty("permission-message", cmd.permissionMessage)
                 }
 
@@ -130,12 +137,14 @@ class PluginGenerator: AbstractProcessor() {
 
                     val children = LinkedHashMap<String, Boolean>()
                     for (child in perm.children) {
-                        children[child.name] = child.inherit
+                        val childName = if (permPrefix == null) child.name else child.name.replace("$", permPrefix)
+                        children[childName] = child.inherit
                     }
                     putIfNotEmpty("children", children)
                 }
 
-                permissions[perm.name] = permInfo
+                val permName = if (permPrefix == null) perm.name else perm.name.replace("$", permPrefix)
+                permissions[permName] = permInfo
             }
             yml.putIfNotEmpty("permissions", permissions)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.hedbor.evan.crunchcommands.command
+package org.hedbor.evan.crunchcommands.command.warp
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.hedbor.evan.crunchcommands.CrunchCommands
+import org.hedbor.evan.crunchcommands.command.CommandResult
+import org.hedbor.evan.crunchcommands.command.Failure
+import org.hedbor.evan.crunchcommands.command.SubCommand
+import org.hedbor.evan.crunchcommands.command.Success
 import org.hedbor.evan.crunchcommands.warp.Warp
 
 
 /**
  * Sub-command to create a warp.
  *
- * @see CommandWarp
+ * @see WarpCommand
  */
-class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.create", true) {
+class CreateWarpCommand(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCommands.PLUGIN_ID}.warp.create", true) {
     override fun execute(sender: CommandSender, args: Array<String>): CommandResult {
         val result = super.execute(sender, args)
         if (result is Failure) return result
@@ -39,13 +43,17 @@ class CommandWarpCreate(plugin: CrunchCommands) : SubCommand(plugin, "${CrunchCo
         }
         val warpName = args[0].toLowerCase()
 
-        val warpManager = plugin.warpManager
-        if (warpManager.getWarp(warpName) != null) {
+        // matches alphanumeric characters, underscore, and dash
+        if (!warpName.matches(Regex("^[\\w-]+$"))) {
+            return Failure.BadWarpName(warpName);
+        }
+
+        if (plugin.warpManager.getWarp(warpName) != null) {
             return Failure.WarpAlreadyExists(warpName)
         }
 
         val warp = Warp(warpName, sender.location, sender.uniqueId)
-        warpManager.addWarp(warp)
+        plugin.warpManager.addWarp(warp)
 
         return Success.WarpCreated(warp)
     }

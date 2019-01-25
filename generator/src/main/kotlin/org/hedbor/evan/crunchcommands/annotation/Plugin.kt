@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Evan Hedbor.
+ * Copyright (C) 2018-2019 Evan Hedbor.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,15 @@ package org.hedbor.evan.crunchcommands.annotation
  * @param authors Uniquely identifies who developed this plugin. If only one
  *     author is provided, the "author" tag will be set in plugin.yml.
  * @param website The plugin's or author's website.
- * @param prefix The name to used when logging to console (instead of the plugin's name).
+ * @param chatPrefix The name to used when logging to console (instead of the plugin's name).
  * @param dependencies A list of dependencies that the plugin requires to load.
  * @param softDependencies A list of plugins required for the plugin to have
  *     full functionality.
  * @param loadBefore A list of plugins that should be loaded after your plugin.
  * @param commands A list of commands the plugin wishes to register.
  * @param permissions Permissions that the plugin wishes to register.
+ * @param permissionPrefix If set, will cause the `$` character to be replaced
+ *     with this message in permission strings.
  */
 @Target(AnnotationTarget.CLASS)
 annotation class Plugin(
@@ -50,10 +52,11 @@ annotation class Plugin(
     val loadOrder: LoadOrder = LoadOrder.NONE_SPECIFIED,
     val authors: Array<String> = [],
     val website: String = "",
-    val prefix: String = "",
+    val chatPrefix: String = "",
     val dependencies: Array<String> = [],
     val softDependencies: Array<String> = [],
     val loadBefore: Array<String> = [],
     val commands: Array<Command> = [],
-    val permissions: Array<Permission> = []
+    val permissions: Array<Permission> = [],
+    val permissionPrefix: String = ""
 )
