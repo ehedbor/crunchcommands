@@ -20,6 +20,7 @@ package org.hedbor.evan.crunchcommands.nbs
 import org.hedbor.evan.crunchcommands.CrunchCommands
 import java.io.DataInputStream
 import java.io.File
+import java.io.IOException
 
 
 /**
@@ -40,21 +41,21 @@ class SongManager(val plugin: CrunchCommands) {
     }
 
     private fun readHeader(input: DataInputStream): Song.Header {
-        val songLength = input.readShort()
-        val songHeight = input.readShort()
+        val songLength = input.readShortLittleEndian()
+        val songHeight = input.readShortLittleEndian()
         val songName = input.readNbsString()
         val songAuthor = input.readNbsString()
         val originalSongAuthor = input.readNbsString()
         val songDescription = input.readNbsString()
-        val tempo = input.readShort()
+        val tempo = input.readShortLittleEndian()
         val autoSaving = input.readBoolean()
         val autoSaveDuration = input.readByte()
         val timeSignature = input.readByte()
-        val minutesSpent = input.readInt()
-        val leftClicks = input.readInt()
-        val rightClicks = input.readInt()
-        val blocksAdded = input.readInt()
-        val blocksRemoved = input.readInt()
+        val minutesSpent = input.readIntLittleEndian()
+        val leftClicks = input.readIntLittleEndian()
+        val rightClicks = input.readIntLittleEndian()
+        val blocksAdded = input.readIntLittleEndian()
+        val blocksRemoved = input.readIntLittleEndian()
         val midiOrSchematicFileName = input.readNbsString()
 
         return Song.Header(
@@ -83,7 +84,7 @@ class SongManager(val plugin: CrunchCommands) {
         var jumps = 0
 
         while (true) {
-            jumps = input.readShort().toInt()
+            jumps = input.readShortLittleEndian().toInt()
             if (jumps == 0) {
                 break
             }
@@ -91,12 +92,15 @@ class SongManager(val plugin: CrunchCommands) {
 
             var layer = -1
             while (true) {
-                jumps = input.readShort().toInt()
+                jumps = input.readShortLittleEndian().toInt()
                 if (jumps == 0) {
                     break
                 }
                 layer += jumps
-                val instrument = input.readByte().toInt()
+                val instrumentByte = input.readByte().toInt()
+                val instrument = Song.Instrument.valueOf(instrumentByte)
+                    ?: throw IOException("Unknown instrument $instrumentByte at tick $tick/layer $layer.")
+
                 val key = input.readByte().toInt()
                 noteBlocks += Song.Note(tick, layer, instrument, key)
             }
@@ -106,11 +110,16 @@ class SongManager(val plugin: CrunchCommands) {
     }
 
     private fun DataInputStream.readNbsString(): String {
-        val length = this.readInt()
+        val length = this.readIntLittleEndian()
         val bytes = ByteArray(length)
         this.read(bytes)
+        plugin.logger.info("Read string $length")
 
         return String(bytes)
     }
+
+    private fun DataInputStream.readIntLittleEndian() = Integer.reverseBytes(readInt())
+    private fun DataInputStream.readShortLittleEndian() = java.lang.Short.reverseBytes(readShort())
+    private fun DataInputStream.readLongLittleEndian() = java.lang.Long.reverseBytes(readLong())
 }
 

@@ -37,9 +37,7 @@ class HomeCommand(plugin: CrunchCommands) : CrunchCommand(plugin, isPlayersOnly 
         if (result !is Success) return result
         sender as Player
 
-        val senderId = sender.uniqueId
         val home = plugin.warpManager.getHome(sender) ?: return Failure.HomeNotSet()
-
         sender.teleport(home.location)
         return Success.WarpUsed()
     }

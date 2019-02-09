@@ -21,9 +21,11 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.hedbor.evan.crunchcommands.annotation.*
 import org.hedbor.evan.crunchcommands.command.CtpCommand
 import org.hedbor.evan.crunchcommands.command.DirtCommand
+import org.hedbor.evan.crunchcommands.command.ReadNbsSongCommand
 import org.hedbor.evan.crunchcommands.command.SuicideCommand
 import org.hedbor.evan.crunchcommands.command.warp.ListWarpCommand
 import org.hedbor.evan.crunchcommands.command.warp.WarpCommand
+import org.hedbor.evan.crunchcommands.nbs.SongManager
 import org.hedbor.evan.crunchcommands.util.ConfigurationSerialization
 import org.hedbor.evan.crunchcommands.util.getObjectList
 import org.hedbor.evan.crunchcommands.util.registerCommands
@@ -45,6 +47,7 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
         Command("dirt", "Provides emergency dirt.", "/dirt", "$.dirt"),
         Command("ctp", "Teleports you to another player.", "/ctp <name>", "$.ctp"),
         Command("home", "Teleports you home.", "/home", "$.home.use"),
+        Command("readsong", "Reads a song.", "/readsong <song>", "$.song.read"),
         Command("sethome", "Sets your home.", "/sethome", "$.home.set"),
         Command("suicide", "Ends your life.", "/<command>", "$.suicide", aliases = ["seppuku", "stuck"]),
         Command("warp", "Base warp command", "/warp <create|list|remove|use> [<...>]", "$.warp"),
@@ -59,6 +62,7 @@ import org.hedbor.evan.crunchcommands.warp.WarpManager
             ChildPermission("$.home.set"),
             ChildPermission("$.home.use")
         ]),
+        Permission("$.song.read", "Allows readsong command", PermissionDefault.ALWAYS),
         Permission("$.suicide", "Allows suicide command", PermissionDefault.ALWAYS),
         Permission("$.warp", "Allows warp base command", PermissionDefault.ALWAYS),
         Permission("$.warp.create", "Allows warp creation", PermissionDefault.OP),
@@ -86,16 +90,19 @@ class CrunchCommands : JavaPlugin() {
     }
 
     lateinit var warpManager: WarpManager
+    lateinit var songManager: SongManager
 
     override fun onEnable() {
         registerCommands(
             "dirt" to DirtCommand(this),
             "ctp" to CtpCommand(this),
+            "readsong" to ReadNbsSongCommand(this),
             "suicide" to SuicideCommand(this),
             "warp" to WarpCommand(this),
             "warps" to ListWarpCommand(this)
         )
 
+        songManager = SongManager(this)
         setupConfig()
     }
 

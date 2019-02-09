@@ -85,24 +85,11 @@ data class Song(
     data class Note(
         val tick: Int,
         val layer: Int,
-        val instrument: Int,
+        val instrument: Instrument,
         val key: Int
     )
 
-    object Instrument {
-        const val PIANO: Byte = 0
-        const val DOUBLE_BASS: Byte = 1
-        const val BASS_DRUM: Byte = 2
-        const val SNARE_DRUM: Byte = 3
-        const val CLICK: Byte = 4
-        const val GUITAR: Byte = 5
-        const val FLUTE: Byte = 6
-        const val BELL: Byte = 7
-        const val CHIME: Byte = 8
-        const val XYLOPHONE: Byte = 9
-    }
-
-    enum class Instrument2(val value: Int, val sound: Sound) {
+    enum class Instrument(val value: Int, val sound: Sound) {
         PIANO(0, Sound.BLOCK_NOTE_BLOCK_HARP),
         DOUBLE_BASS(1, Sound.BLOCK_NOTE_BLOCK_BASS),
         BASS_DRUM(2, Sound.BLOCK_NOTE_BLOCK_BASEDRUM),
@@ -114,5 +101,20 @@ data class Song(
         CHIME(8, Sound.BLOCK_NOTE_BLOCK_CHIME),
         XYLOPHONE(9, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE);
 
+        companion object {
+            fun valueOf(value: Int) = when (value) {
+                0 -> PIANO
+                1 -> DOUBLE_BASS
+                2 -> BASS_DRUM
+                3 -> SNARE_DRUM
+                4 -> CLICK
+                5 -> GUITAR
+                6 -> FLUTE
+                7 -> BELL
+                8 -> CHIME
+                9 -> XYLOPHONE
+                else -> null
+            }
+        }
     }
 }
